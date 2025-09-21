@@ -26,7 +26,15 @@ export async function GET(
 
   // --- Эндээс доош нь 2-р хэсэгт тайлбарласан шалтгаанаар events хоосон гарах магадлалтай ---
   // (Доорх нь “олдвол” ажиллах хэдэн selector-уудын fallback)
-  const events: any[] = [];
+  type Event = {
+    time: string;
+    title: string;
+    location: string;
+    type: string;
+    desc: string;
+    cover?: string;
+  };
+  const events: Event[] = [];
 
   // 1) Possible day-wrapper by attribute
   const dateDot = date.replaceAll("-", "."); // "2025.09.21"

@@ -95,8 +95,12 @@ export default function TechWeekOverlay({
       if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
       const json: ApiData = await r.json();
       setData(json);
-    } catch (e: any) {
-      setErr(e?.message || "Татаж чадсангүй");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setErr(e.message);
+      } else {
+        setErr("Татаж чадсангүй");
+      }
     } finally {
       setLoading(false);
     }
