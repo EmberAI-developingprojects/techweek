@@ -293,7 +293,7 @@ export default function TechWeekOverlay({
                   {selected.time && <div>⏰ {selected.time}</div>}
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
                   <button
                     onClick={() => setShowQR(true)}
                     className="px-4 py-2 rounded-lg bg-cyan-400 text-[#063247] font-bold hover:brightness-110"
@@ -303,7 +303,7 @@ export default function TechWeekOverlay({
                 </div>
 
                 {showQR && selected.qr && (
-                  <div className="mt-6">
+                  <div className="mt-6 justify-center flex flex-col items-center gap-4">
                     <div className="text-sm mb-2 opacity-90">Доорх QR-ийг уншуулж бүртгүүлнэ үү.</div>
                     <img src={selected.qr} alt="QR" className="w-40 h-40 rounded bg-white p-2" />
                   </div>
