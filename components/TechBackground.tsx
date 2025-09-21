@@ -390,41 +390,42 @@ export default function TechnologyBackground() {
 
 
 
-        {/* Buttons — portrait дунд */}
-        <div
-          className="btn-belt pointer-events-auto z-[80]"
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            top: "56vh",
-            width: "min(92vw,1050px)",
-            isolation: "isolate",
-          }}
-        >
-          <div className="flex items-center justify-center gap-[4vw]">
-            <TechWeekOverlay
-              label="Tech Week"
-              triggerClassName="relative px-[7vw] md:px-10 py-3 rounded-full font-semibold text-white
-                                bg-gradient-to-r from-orange-400 to-orange-600
-                                border border-orange-300/50 shadow-lg shadow-orange-500/30
-                                hover:shadow-orange-500/50 focus:outline-none focus:ring-2 focus:ring-orange-300/60
-                                text-base md:text-lg"
-                                    /** 🔽 зөвхөн өнөөдрийн хэсгийг харуулна */
-      dateOffsetDays={0}
-            />
-            <Link
-              href="/ict-forum"
-              className="relative px-[7vw] md:px-10 py-3 rounded-full font-semibold text-white
-                         bg-gradient-to-r from-cyan-400 to-cyan-600
-                         border border-cyan-300/50 shadow-lg shadow-cyan-500/30
-                         hover:shadow-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-300/60
-                         text-base md:text-lg"
-            >
-              ICT Forum
-            </Link>
-          </div>
-        </div>
+        {/* Buttons — align with neon lines */}
+<div
+  className="btn-belt pointer-events-auto z-[80]"
+  style={{
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: "56vh", // line-ийн өндрийн дагуу
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "0 10vw", // хоёр талаас зай
+  }}
+>
+  {/* Left button → Orange line дээр */}
+  <TechWeekOverlay
+    label="Tech Week"
+    triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
+                      bg-gradient-to-r from-orange-400 to-orange-600
+                      border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
+                      hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70"
+    dateOffsetDays={0}
+  />
+
+  {/* Right button → Cyan line дээр */}
+  <Link
+    href="/ict-forum"
+    className="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
+               bg-gradient-to-r from-cyan-400 to-cyan-600
+               border-2 border-cyan-300/70 shadow-xl shadow-cyan-500/40
+               hover:shadow-cyan-500/70 focus:outline-none focus:ring-4 focus:ring-cyan-300/70"
+  >
+    ICT Forum
+  </Link>
+</div>
+
       </div>
 
       <style jsx>{`
