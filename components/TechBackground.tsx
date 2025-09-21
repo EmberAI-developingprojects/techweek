@@ -414,7 +414,6 @@ export default function TechnologyBackground() {
                         border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
                         hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
                         mix-blend-normal"
-      dateOffsetDays={0}
     />
     <ICTForumOverlay />
   </div>

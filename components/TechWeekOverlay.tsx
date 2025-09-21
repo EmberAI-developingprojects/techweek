@@ -1,294 +1,316 @@
 // components/TechWeekOverlay.tsx
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-type EventItem = {
+// ===== Types =====
+export type EventItem = {
   time?: string;
   title?: string;
-  location?: string;
+  company?: string;
   type?: string;
-  price?: string | number;
-  ctaUrl?: string;
-  ctaLabel?: string;
+  location?: string;
+  pay?: string;      // e.g. "ТӨЛБӨРГҮЙ"
   desc?: string;
-  cover?: string; // optional thumbnail
+  image?: string;    // thumbnail / cover
+  qr?: string;       // QR image path
+  ctaLabel?: string; // optional custom label
 };
 
-type ApiData = {
-  date: string;
-  events: EventItem[];
-};
+export type DayPayload = { date?: string; events: EventItem[] };
 
-type Props = {
+export type TechWeekOverlayProps = {
   label?: string;
   triggerClassName?: string;
-  /** 0 = today, -1 = yesterday, +1 = tomorrow ... */
-  dateOffsetDays?: number;
-  /** Хэрэв алдаа гарвал бүтэн сайт руу үсэрнэ */
-  fallbackSrc?: string;
-  /** API суурь path (өөрчилж болно) */
-  apiBase?: string; // ж: "/api/schedule"
+  /** Where JSON lives. Example: "/schedule" or "/api/schedule" */
+  dataBase?: string;
+  /** Force timezone when choosing today's file */
+  timeZone?: string; // default "Asia/Ulaanbaatar"
 };
 
-function toYMD(d = new Date()) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+// ===== Utils =====
+function todayYMD(tz = "Asia/Ulaanbaatar") {
+  const d = new Date();
+  const y = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric" }).format(d);
+  const m = new Intl.DateTimeFormat("en-CA", { timeZone: tz, month: "2-digit" }).format(d);
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: tz, day: "2-digit" }).format(d);
+  return `${y}-${m}-${day}`; // 2025-09-21
 }
 
+// ===== Component =====
 export default function TechWeekOverlay({
   label = "Tech Week",
   triggerClassName = "",
-  dateOffsetDays = 0,
-  fallbackSrc = "https://tech-week.mn/index.html#section-schedule",
-  apiBase = "/api/schedule",
-}: Props) {
-  const [open, setOpen] = useState(false);
-  const [dateStr, setDateStr] = useState<string>("");
-  const [data, setData] = useState<ApiData | null>(null);
+  dataBase = "/schedule",
+  timeZone = "Asia/Ulaanbaatar",
+}: TechWeekOverlayProps) {
+  // List modal (day view)
+  const [openList, setOpenList] = useState(false);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Start date from offset
-  const initialDate = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + dateOffsetDays);
-    return d;
-  }, [dateOffsetDays]);
+  // Detail modal
+  const [selected, setSelected] = useState<EventItem | null>(null);
+  const [showQR, setShowQR] = useState(false);
 
+  // Close on ESC (both modals)
   useEffect(() => {
-    setDateStr(toYMD(initialDate));
-  }, [initialDate]);
-
-  // Esc to close
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey, { passive: true });
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  // Lock scroll when modal open
-  useEffect(() => {
-    const prevHtml = document.documentElement.style.overflow;
-    const prevBody = document.body.style.overflow;
-    if (open) {
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.documentElement.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (selected) {
+          setSelected(null);
+          setShowQR(false);
+        } else if (openList) {
+          setOpenList(false);
+        }
+      }
     };
-  }, [open]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openList, selected]);
 
-  // Fetch schedule
-  const fetchSchedule = async (d: string) => {
+  // Fetch today's events when list opens
+  useEffect(() => {
+    if (!openList) return;
+    const ymd = todayYMD(timeZone);
     setLoading(true);
     setErr(null);
-    setData(null);
-    try {
-      const r = await fetch(`${apiBase}/${d}`, { cache: "no-store" });
-      if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-      const json: ApiData = await r.json();
-      setData(json);
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErr(e.message);
-      } else {
-        setErr("Татаж чадсангүй");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    setEvents([]);
 
+    // Choose between static folder and API shape
+    const url =
+      dataBase.endsWith("/api/schedule") || dataBase.includes("/api/")
+        ? `${dataBase.replace(/\/$/, "")}/${ymd}`
+        : `${dataBase.replace(/\/$/, "")}/${ymd}.json`;
+
+    fetch(url, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.json() as Promise<DayPayload>;
+      })
+      .then((json) => setEvents(Array.isArray(json.events) ? json.events : []))
+      .catch((e) => setErr(e.message))
+      .finally(() => setLoading(false));
+  }, [openList, dataBase, timeZone]);
+
+  // Click-away helper
+  const clickAway =
+    (closer: () => void) => (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) closer();
+    };
+
+  // Lock page scroll while any modal is open
   useEffect(() => {
-    if (open && dateStr) fetchSchedule(dateStr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, dateStr]);
-
-  const shiftDay = (delta: number) => {
-    const d = new Date(dateStr);
-    d.setDate(d.getDate() + delta);
-    setDateStr(toYMD(d));
-  };
+    const html = document.documentElement.style;
+    const body = document.body.style;
+    const lock = openList || !!selected;
+    html.overflow = lock ? "hidden" : "";
+    body.overflow = lock ? "hidden" : "";
+    return () => {
+      html.overflow = "";
+      body.overflow = "";
+    };
+  }, [openList, selected]);
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className={triggerClassName}>
+      <button onClick={() => setOpenList(true)} className={triggerClassName}>
         {label}
       </button>
 
-      {open && (
+      {/* ===================== LIST MODAL ===================== */}
+      {openList && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-[2vw]"
+          className="fixed inset-0 z-[9999] flex items-center justify-center   p-4"
           role="dialog"
           aria-modal="true"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
+          onClick={clickAway(() => setOpenList(false))}
         >
-          <div
-            ref={dialogRef}
-            className="relative w-full max-w-[1200px] h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-          >
-            {/* Top bar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b">
-              <div className="font-semibold text-lg">Tech Week цагалбар</div>
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  onClick={() => shiftDay(-1)}
-                  className="px-3 py-1 rounded-md border hover:bg-gray-50"
-                  title="Өмнөх өдөр"
-                >
-                  ←
-                </button>
-                <div className="min-w-[9.5rem] text-center font-medium">
-                  {dateStr}
-                </div>
-                <button
-                  onClick={() => shiftDay(+1)}
-                  className="px-3 py-1 rounded-md border hover:bg-gray-50"
-                  title="Дараагийн өдөр"
-                >
-                  →
-                </button>
-                <button
-                  onClick={() => fetchSchedule(dateStr)}
-                  className="ml-2 px-3 py-1 rounded-md border hover:bg-gray-50"
-                  title="Дахин ачаалах"
-                >
-                  Refresh
-                </button>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="ml-2 px-3 py-1 rounded-md bg-red-500 hover:bg-red-600 text-white"
-                  aria-label="Close"
-                  dangerouslySetInnerHTML={{ __html: "&times;" }}
-                />
-              </div>
+          <div className="relative w-full max-w-6xl h-[90vh] overflow-hidden rounded-2xl shadow-2xl text-white bg-[#0f2d63] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center gap-2 px-5 py-3 bg-[#0c2653] shrink-0">
+              <h2 className="text-xl font-semibold">Tech Week 2025 — Өнөөдрийн хөтөлбөр</h2>
+              <button
+                onClick={() => setOpenList(false)}
+                className="ml-auto h-9 w-9 grid place-items-center rounded-full bg-red-500/90 hover:bg-red-600 text-white"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
-            {/* Loading bar */}
-            {loading && (
-              <div className="absolute left-0 top-[49px] h-1 w-full bg-black/10">
-                <div className="h-full w-1/3 animate-[twkLoad_1.2s_ease-in-out_infinite] bg-cyan-500/70" />
-              </div>
-            )}
-
-            {/* Content */}
-            <div className="flex-1 overflow-auto p-4">
-              {err && (
-                <div className="space-y-3">
-                  <div className="text-red-600 font-medium">
-                    Алдаа: {err}
-                  </div>
-                  <a
-                    href={fallbackSrc}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    Бүтэн сайтаар харах
-                  </a>
-                </div>
+            {/* Body scrollable */}
+            <div className="flex-1 overflow-y-auto px-3 sm:px-5 py-5">
+              {loading && <div className="opacity-80">Ачаалж байна…</div>}
+              {err && <div className="text-red-300">Алдаа: {err}</div>}
+              {!loading && !err && events.length === 0 && (
+                <div className="opacity-80">Энэ өдөр эвент алга.</div>
               )}
 
-              {!err && !loading && (!data || data.events?.length === 0) && (
-                <div className="text-gray-500">Энэ өдөр эвент алга.</div>
-              )}
+              <ul className="space-y-12">
+                {events.map((ev, i) => (
+                  <li key={i} className="relative">
+                    <div className="absolute left-28 sm:left-32 top-0 bottom-0 w-px bg-white/10" />
 
-              {!err && data?.events?.length ? (
-                <ul className="space-y-4">
-                  {data.events.map((ev, i) => (
-                    <li
-                      key={i}
-                      className="p-4 rounded-xl border shadow-sm hover:shadow transition bg-white/70"
-                    >
-                      <div className="flex items-start gap-4">
-                        {ev.cover ? (
-                          // optional thumbnail
+                    <div className="grid grid-cols-[120px,1fr,auto] sm:grid-cols-[140px,1fr,auto] gap-4 items-start">
+                      {/* LEFT: location/time */}
+                      <div className="pt-1 text-sm">
+                        {ev.location && <div className="opacity-90">{ev.location}</div>}
+                        {ev.time && (
+                          <div className="mt-2 font-bold text-cyan-200">
+                            {ev.time} <span className="opacity-70">цаг</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* CENTER: image + text */}
+                      <div className="flex gap-5 min-w-0">
+                        {ev.image && (
                           <img
-                            src={ev.cover}
+                            src={ev.image}
                             alt=""
-                            className="w-16 h-16 object-cover rounded-lg border"
+                            className="w-[120px] h-[120px] rounded-lg object-cover border border-white/10"
                           />
-                        ) : null}
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            {ev.time && (
-                              <span className="px-2 py-0.5 text-sm rounded bg-gray-900 text-white">
-                                {ev.time}
-                              </span>
-                            )}
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
                             {ev.type && (
-                              <span className="px-2 py-0.5 text-sm rounded bg-cyan-100 text-cyan-800">
-                                {ev.type}
+                              <span className="text-xs font-semibold tracking-wide px-2 py-0.5 rounded bg-[#0b4a78]">
+                                {ev.type.toUpperCase()}
                               </span>
                             )}
-                            {ev.location && (
-                              <span className="px-2 py-0.5 text-sm rounded bg-gray-100 text-gray-700">
-                                {ev.location}
-                              </span>
-                            )}
-                            {ev.price && (
-                              <span className="px-2 py-0.5 text-sm rounded bg-amber-100 text-amber-800">
-                                {typeof ev.price === "number"
-                                  ? new Intl.NumberFormat().format(ev.price)
-                                  : ev.price}
+                            {ev.company && (
+                              <span className="text-[11px] sm:text-xs opacity-80 tracking-widest">
+                                {ev.company}
                               </span>
                             )}
                           </div>
 
-                          <h3 className="mt-2 font-semibold text-lg leading-snug">
-                            {ev.title || "No title"}
+                          <h3 className="text-2xl sm:text-[26px] font-bold leading-tight text-cyan-300 hover:text-cyan-200">
+                            {ev.title}
                           </h3>
 
                           {ev.desc && (
-                            <p className="mt-1 text-sm text-gray-600 line-clamp-3">
+                            <p className="mt-2 text-sm sm:text-[15px] opacity-90 leading-relaxed line-clamp-3">
                               {ev.desc}
                             </p>
                           )}
-
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {ev.ctaUrl && (
-                              <a
-                                href={ev.ctaUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                              >
-                                {ev.ctaLabel || "Дэлгэрэнгүй / Бүртгүүлэх"}
-                              </a>
-                            )}
-                          </div>
                         </div>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+
+                      {/* RIGHT: buttons */}
+                      <div className="flex flex-col gap-2 shrink-0">
+                        {ev.pay && (
+                          <span className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-[#163a6b] text-white text-sm font-semibold">
+                            {ev.pay}
+                          </span>
+                        )}
+                        <button
+                          onClick={() => {
+                            setSelected(ev);
+                            setShowQR(false);
+                          }}
+                          className="h-9 px-4 rounded-lg bg-cyan-400 text-[#063247] text-sm font-bold hover:brightness-110"
+                        >
+                          Дэлгэрэнгүй
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 h-px bg-white/10" />
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
+        </div>
+      )}
 
-          <style jsx>{`
-            @keyframes twkLoad {
-              0% {
-                transform: translateX(-30%);
-              }
-              50% {
-                transform: translateX(50%);
-              }
-              100% {
-                transform: translateX(130%);
-              }
-            }
-          `}</style>
+      {/* ===================== DETAIL MODAL ===================== */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={clickAway(() => {
+            setSelected(null);
+            setShowQR(false);
+          })}
+        >
+          <div className="relative w-full max-w-5xl h-[90vh] rounded-xl bg-[#0c2653] text-white shadow-2xl overflow-hidden flex flex-col">
+            {/* round X */}
+            <button
+              onClick={() => {
+                setSelected(null);
+                setShowQR(false);
+              }}
+              className="absolute top-3 right-3 h-9 w-9 grid place-items-center rounded-full bg-red-500/90 hover:bg-red-600 text-white"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+
+            {/* Image on top, content under (both scrollable area) */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Top image */}
+              {selected.image && (
+                <div className="w-full flex justify-center bg-[#153061] px-4 pt-4">
+                  <img
+                    src={selected.image}
+                    alt=""
+                    className="max-h-[45vh] w-auto object-contain rounded-lg"
+                  />
+                </div>
+              )}
+
+              {/* Info under image */}
+              <div className="p-6">
+                <h3 className="text-2xl md:text-3xl font-bold text-cyan-300 leading-tight">
+                  {selected.title}
+                </h3>
+                {selected.company && (
+                  <p className="mt-1 text-sm opacity-80 tracking-wide">{selected.company}</p>
+                )}
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {selected.type && (
+                    <span className="text-xs font-semibold tracking-wide px-2 py-0.5 rounded bg-[#0b4a78]">
+                      {selected.type}
+                    </span>
+                  )}
+                  {selected.pay && (
+                    <span className="text-xs px-2 py-0.5 rounded bg-[#163a6b]">{selected.pay}</span>
+                  )}
+                </div>
+
+                {selected.desc && (
+                  <p className="mt-4 text-sm leading-relaxed opacity-95">{selected.desc}</p>
+                )}
+
+                <div className="mt-4 space-y-1 text-sm">
+                  {selected.location && <div>📍 {selected.location}</div>}
+                  {selected.time && <div>⏰ {selected.time}</div>}
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    onClick={() => setShowQR(true)}
+                    className="px-4 py-2 rounded-lg bg-cyan-400 text-[#063247] font-bold hover:brightness-110"
+                  >
+                    {selected.ctaLabel || "БҮРТГҮҮЛЭХ"}
+                  </button>
+                </div>
+
+                {showQR && selected.qr && (
+                  <div className="mt-6">
+                    <div className="text-sm mb-2 opacity-90">Доорх QR-ийг уншуулж бүртгүүлнэ үү.</div>
+                    <img src={selected.qr} alt="QR" className="w-40 h-40 rounded bg-white p-2" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </>
