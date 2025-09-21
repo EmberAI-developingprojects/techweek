@@ -1,5 +1,6 @@
 // components/AvatarVideoFixed.tsx
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -8,13 +9,9 @@ type Props = {
   left?: string;
   z?: number;
   ignorePointer?: boolean;
-
-  /** Доороос эхэлж сунгана: container height = 100vh - headroomVh */
   fitFromBottom?: boolean;
-  headroomVh?: number; // логогийн доорх зай (vh)
-
-  /** Сонголт: жаахан томруулж (доод талаасаа якорлох) */
-  zoom?: number;       // ж: 1.00 ~ 1.10
+  headroomVh?: number;
+  zoom?: number;
 };
 
 export default function AvatarVideoFixed({
@@ -24,8 +21,8 @@ export default function AvatarVideoFixed({
   z = 80,
   ignorePointer = true,
   fitFromBottom = true,
-  headroomVh = 24, // logo top ~10vh + logo height ~12vh + 2vh gap
-  zoom = 1,
+  headroomVh = 18,   // дээр үлдээх чөлөөт зай
+  zoom = 1.1,        // жаахан томруулалт
 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
@@ -45,12 +42,12 @@ export default function AvatarVideoFixed({
       style={{
         position: "absolute",
         left,
-        bottom: 0,                                                // ⬅️ доороос наалдсан
+        bottom: 0,
         transform: "translateX(-50%)",
         height: fitFromBottom ? `calc(100vh - ${headroomVh}vh)` : undefined,
         zIndex: z,
         pointerEvents: ignorePointer ? "none" : "auto",
-        overflow: "hidden",                                       // ⬅️ дээгүүр илүүдвэл тайрна
+        overflow: "hidden",
       }}
     >
       <video
@@ -63,13 +60,13 @@ export default function AvatarVideoFixed({
         playsInline
         preload="auto"
         style={{
-          height: "100%",                 // контейнерийн өндрийг дүүргэнэ
-          width: "auto",
+          height: "100%",
+          width: "100%",
           display: "block",
           background: "transparent",
-          objectFit: "cover",             // ⬅️ сул зай ҮГҮЙ
-          objectPosition: "bottom center",// ⬅️ доод ирмэгт түгжинэ
-          transform: `scale(${zoom})`,    // ⬅️ хүсвэл үл ялиг томруулж болно
+          objectFit: "cover",          // ⬅️ томруулж багтаана, тал бага зэрэг тайрагдаж болно
+          objectPosition: "bottom center",
+          transform: `scale(${zoom})`,
           transformOrigin: "bottom center",
         }}
       />

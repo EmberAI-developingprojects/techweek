@@ -411,6 +411,8 @@ export default function TechnologyBackground() {
                                 border border-orange-300/50 shadow-lg shadow-orange-500/30
                                 hover:shadow-orange-500/50 focus:outline-none focus:ring-2 focus:ring-orange-300/60
                                 text-base md:text-lg"
+                                    /** 🔽 зөвхөн өнөөдрийн хэсгийг харуулна */
+      dateOffsetDays={0}
             />
             <Link
               href="/ict-forum"
