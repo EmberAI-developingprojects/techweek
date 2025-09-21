@@ -1,7 +1,6 @@
 // components/AvatarVideoFixed.tsx
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   src?: string;
@@ -9,8 +8,7 @@ type Props = {
   left?: string;
   z?: number;
   ignorePointer?: boolean;
-  fitFromBottom?: boolean;
-  headroomVh?: number;
+  headroomVh?: number;  // дээр үлдээх зай
   zoom?: number;
 };
 
@@ -20,20 +18,15 @@ export default function AvatarVideoFixed({
   left = "50%",
   z = 80,
   ignorePointer = true,
-  fitFromBottom = true,
-  headroomVh = 18,   // дээр үлдээх чөлөөт зай
-  zoom = 1.1,        // жаахан томруулалт
+  headroomVh = 18,   // ⬅️ логоноос үлдээх зай
+  zoom = 1.1,        // ⬅️ жаахан томруулалт
 }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
-    const onMeta = () => setReady(true);
-    v.addEventListener("loadedmetadata", onMeta);
     v.play().catch(() => {});
-    return () => v.removeEventListener("loadedmetadata", onMeta);
   }, []);
 
   return (
@@ -44,10 +37,11 @@ export default function AvatarVideoFixed({
         left,
         bottom: 0,
         transform: "translateX(-50%)",
-        height: fitFromBottom ? `calc(100vh - ${headroomVh}vh)` : undefined,
+        height: `calc(100vh - ${headroomVh}vh)`, // логоны доогуур үлдээх
         zIndex: z,
         pointerEvents: ignorePointer ? "none" : "auto",
         overflow: "hidden",
+        width: "100vw", // дэлгэцийн өргөнийг бүхэлд нь эзэлнэ
       }}
     >
       <video
@@ -60,12 +54,12 @@ export default function AvatarVideoFixed({
         playsInline
         preload="auto"
         style={{
+          width: "100%",              // дэлгэцийг бүхэлд нь эзлэх
           height: "100%",
-          width: "100%",
           display: "block",
           background: "transparent",
-          objectFit: "cover",          // ⬅️ томруулж багтаана, тал бага зэрэг тайрагдаж болно
-          objectPosition: "bottom center",
+          objectFit: "cover",         // дүүртэл томруулна, тал хэсэг тайрагдаж болно
+          objectPosition: "bottom center", // доороос төв
           transform: `scale(${zoom})`,
           transformOrigin: "bottom center",
         }}

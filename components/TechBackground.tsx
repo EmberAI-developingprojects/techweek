@@ -381,7 +381,6 @@ export default function TechnologyBackground() {
       <AvatarVideoFixed
   src="/media/newmodel.webm"
   left="50%"
-  fitFromBottom
   headroomVh={24}   // логогийн доор үлдэх зай; 22–28 хооронд тааруулж болно
   zoom={1.03}       // доороос түгжээтэй бага зэргийн томролт (сонголт)
   z={75}            // товчноос доор, товч нь дээр харагдана
