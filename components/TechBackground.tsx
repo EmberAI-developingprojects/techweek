@@ -299,7 +299,7 @@ function hexScatterFloat(opts:{
   const { count, minSize, maxSize, viewW, viewH, rand } = opts;
   const items: HexItem[] = [];
   const minDist = 120;
-  let tries = 0, MAX_TRIES = count * 120;
+  let tries = 0; const MAX_TRIES = count * 120;
 
   while (items.length < count && tries < MAX_TRIES) {
     tries++;
