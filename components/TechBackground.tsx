@@ -1,9 +1,12 @@
 // components/TechBackground.tsx
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+;
 import TechWeekOverlay from "@/components/TechWeekOverlay";
 import AvatarVideoFixed from "@/components/AvatarVideoFixed";
+import ICTForumOverlay from "@/components/ICTForumOverlay";
+import ClientPortal from "@/components/ClientPortal";
+
 
 /* 🎨 Background */
 const BASE_COLOR = "#0d2c63";
@@ -254,7 +257,7 @@ export default function TechnologyBackground() {
 
       {/* ==== BEAMS ==== */}
       <div
-        className="absolute inset-0 opacity-80 mix-blend-screen will-change-transform pointer-events-none"
+        className="absolute inset-0 opacity-80 will-change-transform pointer-events-none"
         style={{ transform: tr(6) }}
         aria-hidden
       >
@@ -386,88 +389,40 @@ export default function TechnologyBackground() {
   z={75}            // товчноос доор, товч нь дээр харагдана
   ignorePointer
 />
-
-
-
-
-        {/* Buttons — align with neon lines */}
-<div
-  className="btn-belt pointer-events-auto z-[80]"
-  style={{
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: "56vh", // line-ийн өндрийн дагуу
-    width: "100%",
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "0 10vw", // хоёр талаас зай
-  }}
->
-  {/* Left button → Orange line дээр */}
-  <TechWeekOverlay
-    label="Tech Week"
-    triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
-                      bg-gradient-to-r from-orange-400 to-orange-600
-                      border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
-                      hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70"
-    dateOffsetDays={0}
-  />
-
-  {/* Right button → Cyan line дээр */}
-  <Link
-    href="/ict-forum"
-    className="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
-               bg-gradient-to-r from-cyan-400 to-cyan-600
-               border-2 border-cyan-300/70 shadow-xl shadow-cyan-500/40
-               hover:shadow-cyan-500/70 focus:outline-none focus:ring-4 focus:ring-cyan-300/70"
+<ClientPortal>
+  <div
+    className="pointer-events-auto"  // parent нь pointerEvents:none тул энд идэвхжүүлнэ
+    style={{
+      position: "absolute",
+      top: "56vh",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "min(66vw, 800px)",
+      display: "flex",
+      justifyContent: "space-between",
+      // ямар ч blur/blend нөлөөгүй байх хамгаалалтууд:
+      mixBlendMode: "normal",
+      isolation: "isolate",
+      WebkitBackdropFilter: "none",
+      backdropFilter: "none",
+    }}
   >
-    ICT Forum
-  </Link>
-</div>
+    <TechWeekOverlay
+      label="Tech Week"
+      triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
+                        bg-gradient-to-r from-orange-400 to-orange-600
+                        border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
+                        hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
+                        mix-blend-normal"
+      dateOffsetDays={0}
+    />
+    <ICTForumOverlay />
+  </div>
+  
+</ClientPortal>
 
       </div>
 
-      <style jsx>{`
-        @keyframes twkGradient {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        @keyframes twkTwinkle {
-          0%,
-          100% {
-            opacity: 0.2;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.3);
-          }
-        }
-        @media (max-aspect-ratio: 9/16) {
-          .btn-belt {
-            top: 58vh !important;
-          }
-        }
-        @media (max-aspect-ratio: 9/18) {
-          .btn-belt {
-            top: 60vh !important;
-          }
-        }
-        @media (min-aspect-ratio: 16/10) {
-          .btn-belt {
-            top: 64vh !important;
-            width: min(88vw, 1200px) !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
