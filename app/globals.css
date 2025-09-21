@@ -1,45 +1,75 @@
-/* =======================
-   TechWeek Global Styles
-   ======================= */
+@import "tailwindcss";
 
-/* Brand */
+/* ─── Brand colors ───────────────────────── */
 :root{
-  --twk-navy:#0f305a;
-  --twk-cyan:#00D4FF;
-  --twk-orange:#FFA500;
+  --brand-navy:#0d2c63;         /* үндсэн фон  */
+  --navy-top:#061c42;           /* дээд виньеттэд */
+  --navy-bottom:#04122c;        /* доод виньеттэд */
+  --accent-cyan:#38bdf8;        /* акцент гэрэл  */
+  --accent-blue:#3b82f6;
 }
 
 html,body{height:100%}
-body{background:var(--twk-navy)}
+body{background:var(--brand-navy);color:#fff}
 
-/* Bevel helper */
-.panel-bevel{position:relative}
-.panel-bevel::after{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  box-shadow:
-    0 24px 48px rgba(0,0,0,.34),
-    0 2px 0 rgba(255,255,255,.06) inset,
-    0 -2px 0 rgba(0,0,0,.25) inset;
-}
-
-/* Vignette + Grain */
-.bg-vignette,.bg-grain{position:relative;isolation:isolate}
-.bg-vignette::before{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+/* Хоёр тал ижил харагдуулах суурь виньетт */
+.bg-tech-navy{
   background:
-    radial-gradient(60% 60% at 50% 35%, rgba(255,255,255,.06), rgba(255,255,255,0) 60%),
-    radial-gradient(120% 80% at 50% 110%, rgba(0,0,0,.35), rgba(0,0,0,0) 50%);
-  mix-blend-mode:overlay;
+    radial-gradient(120% 80% at 50% 0%, rgba(6,28,66,.55), transparent 60%),
+    radial-gradient(90% 85% at 50% 100%, rgba(4,18,44,.55), rgba(0,0,0,.78));
 }
-.bg-grain::after{
-  content:"";position:absolute;inset:-50%;pointer-events:none;z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:140px 140px;opacity:.4;mix-blend-mode:soft-light;
-  animation:grainMove 20s linear infinite;
-}
-@keyframes grainMove{from{transform:translate3d(0,0,0)}to{transform:translate3d(-10%,6%,0)}}
 
-/* Motion utilities (optional) */
-@keyframes tw-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.animate-tw-float{animation:tw-float 10s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.animate-tw-float{animation:none!important}}
+/* Beams — улбар туяа АВАВ, зөвхөн хөх/циан */
+.bg-tech-beams{
+  background-size:200% 200%;
+  background-image:
+    radial-gradient(900px 260px at 12% 60%, rgba(56,189,248,.18), transparent 60%),
+    radial-gradient(900px 260px at 88% 40%, rgba(59,130,246,.16), transparent 60%),
+    linear-gradient(105deg, rgba(56,189,248,.08), rgba(59,130,246,.05) 60%);
+  animation: twkGradient 24s linear infinite;
+  mix-blend-mode:screen;
+}
+
+/* Edge sweep shimmer (захад гялбаа) */
+.edge-sweep{
+  background-image:conic-gradient(from 0deg,
+    rgba(255,255,255,.22), rgba(56,189,248,.22), rgba(255,255,255,.22));
+  animation: twkEdgeSweep 9s linear infinite;
+  opacity:.16;
+  mask: radial-gradient(65% 60% at 50% 50%, transparent 55%, black 75%);
+}
+
+/* Light trails-д хэрэглэх stroke gradient */
+svg defs linearGradient#twkLine stop:nth-child(2){
+  stop-color: var(--accent-cyan);
+}
+
+/* ─── Таны өгсөн keyframes + нэмэлт ─────── */
+@keyframes twkGradient {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+@keyframes twkSweep {
+  0% { transform: translateX(0); opacity:.2 }
+  40% { opacity:.9 }
+  100% { transform: translateX(-6%); opacity:.2 }
+}
+@keyframes twkDash {
+  0% { stroke-dashoffset: 200; opacity:.55 }
+  50% { stroke-dashoffset: 0; opacity:.9 }
+  100% { stroke-dashoffset: -200; opacity:.55 }
+}
+@keyframes twkTwinkle {
+  0%,100% { transform: translateY(0) scale(1); opacity:.2 }
+  50% { transform: translateY(-2px) scale(1.6); opacity:1 }
+}
+/* нэмэлтүүд */
+@keyframes twkBreath { 0%,100%{transform:scale(.985);opacity:.6} 50%{transform:scale(1.02);opacity:.9} }
+@keyframes twkEdgeSweep { to{ transform:rotate(360deg) } }
+@keyframes twkShock { 0%{opacity:0} 12%{opacity:.24} 100%{opacity:0} }
+
+/* Motion accessibility */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important }
+}

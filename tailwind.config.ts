@@ -1,17 +1,7 @@
-// tailwind.config.mjs
-export default {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        brand: {
-          navy: "#0f305a",     // bg-brand-navy
-        },
-      },
-    },
-  },
-  plugins: [],
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+ content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+
 };
+export default config;

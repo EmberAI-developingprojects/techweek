@@ -1,11 +1,12 @@
-import "./globals.css";
+import "./globals.css";           // ← энэ мөр заавал байна
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "TechWeek 2025" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="relative min-h-dvh overflow-hidden bg-[var(--twk-navy)] text-white antialiased">
-        {children}
-      </body>
+    <html lang="mn">
+      <body>{children}</body>
     </html>
   );
 }
