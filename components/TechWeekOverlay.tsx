@@ -1,7 +1,7 @@
 // components/TechWeekOverlay.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // ===== Types =====
 export type EventItem = {
@@ -10,10 +10,10 @@ export type EventItem = {
   company?: string;
   type?: string;
   location?: string;
-  pay?: string;      // e.g. "ТӨЛБӨРГҮЙ"
+  pay?: string; // e.g. "ТӨЛБӨРГҮЙ"
   desc?: string;
-  image?: string;    // thumbnail / cover
-  qr?: string;       // QR image path
+  image?: string; // thumbnail / cover
+  qr?: string; // QR image path
   ctaLabel?: string; // optional custom label
 };
 
@@ -29,13 +29,19 @@ export type TechWeekOverlayProps = {
 };
 
 // ===== Utils =====
-function todayYMD(tz = "Asia/Ulaanbaatar") {
-  const d = new Date();
-  const y = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric" }).format(d);
-  const m = new Intl.DateTimeFormat("en-CA", { timeZone: tz, month: "2-digit" }).format(d);
-  const day = new Intl.DateTimeFormat("en-CA", { timeZone: tz, day: "2-digit" }).format(d);
-  return `${y}-${m}-${day}`; // 2025-09-21
+function weekdayMN(iso: string) {
+  const d = new Date(iso + "T00:00:00");
+  return [
+    "Ням гариг",
+    "Даваа гариг",
+    "Мягмар гариг",
+    "Лхагва гариг",
+    "Пүрэв гариг",
+    "Баасан гариг",
+    "Бямба гариг",
+  ][d.getDay()];
 }
+const dotDate = (iso: string) => iso.replaceAll("-", ".");
 
 // ===== Component =====
 export default function TechWeekOverlay({
@@ -44,9 +50,15 @@ export default function TechWeekOverlay({
   dataBase = "/schedule",
   timeZone = "Asia/Ulaanbaatar",
 }: TechWeekOverlayProps) {
-  // List modal (day view)
+  // List modal
   const [openList, setOpenList] = useState(false);
-  const [events, setEvents] = useState<EventItem[]>([]);
+
+  // Multi-day
+  const [dates, setDates] = useState<string[]>([]); // yyyy-mm-dd from index.json
+  const [daysMap, setDaysMap] = useState<Record<string, EventItem[]>>({});
+  const [activeDate, setActiveDate] = useState<string | null>(null);
+
+  // Loading / error
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -65,40 +77,16 @@ export default function TechWeekOverlay({
           setOpenList(false);
         }
       }
+      if (openList && !selected && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        if (!activeDate || dates.length === 0) return;
+        const idx = dates.indexOf(activeDate);
+        const next = e.key === "ArrowLeft" ? idx - 1 : idx + 1;
+        if (next >= 0 && next < dates.length) setActiveDate(dates[next]);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openList, selected]);
-
-  // Fetch today's events when list opens
-  useEffect(() => {
-    if (!openList) return;
-    const ymd = todayYMD(timeZone);
-    setLoading(true);
-    setErr(null);
-    setEvents([]);
-
-    // Choose between static folder and API shape
-    const url =
-      dataBase.endsWith("/api/schedule") || dataBase.includes("/api/")
-        ? `${dataBase.replace(/\/$/, "")}/${ymd}`
-        : `${dataBase.replace(/\/$/, "")}/${ymd}.json`;
-
-    fetch(url, { cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-        return r.json() as Promise<DayPayload>;
-      })
-      .then((json) => setEvents(Array.isArray(json.events) ? json.events : []))
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false));
-  }, [openList, dataBase, timeZone]);
-
-  // Click-away helper
-  const clickAway =
-    (closer: () => void) => (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) closer();
-    };
+  }, [openList, selected, dates, activeDate]);
 
   // Lock page scroll while any modal is open
   useEffect(() => {
@@ -113,6 +101,57 @@ export default function TechWeekOverlay({
     };
   }, [openList, selected]);
 
+  // When list opens: load /schedule/index.json then fetch all day files
+  useEffect(() => {
+    if (!openList) return;
+
+    const base = dataBase.replace(/\/$/, "");
+    const indexUrl = `${base}/index.json`;
+
+    setLoading(true);
+    setErr(null);
+    setDates([]);
+    setDaysMap({});
+
+    fetch(indexUrl, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.json() as Promise<{ dates: string[] }>; // as shown in your screenshot
+      })
+      .then(async (idx) => {
+        const list = Array.isArray(idx.dates) ? idx.dates.slice() : [];
+        list.sort(); // ensure asc
+        setDates(list);
+
+        // fetch all date jsons
+        const reqs = list.map((d) =>
+          fetch(`${base}/${d}.json`, { cache: "no-store" })
+            .then((r) => (r.ok ? r.json() as Promise<DayPayload> : null))
+            .catch(() => null)
+        );
+        const results = await Promise.all(reqs);
+        const map: Record<string, EventItem[]> = {};
+        results.forEach((day, i) => {
+          const key = list[i];
+          map[key] = day && Array.isArray(day.events) ? day.events : [];
+        });
+        setDaysMap(map);
+
+        // default active: today if present, else first
+        const today = new Intl.DateTimeFormat("en-CA", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date());
+        setActiveDate(list.includes(today) ? today : list[0] ?? null);
+      })
+      .catch((e) => setErr(e.message))
+      .finally(() => setLoading(false));
+  }, [openList, dataBase, timeZone]);
+
+  const events = useMemo(() => (activeDate ? daysMap[activeDate] || [] : []), [activeDate, daysMap]);
+
   return (
     <>
       <button onClick={() => setOpenList(true)} className={triggerClassName}>
@@ -122,15 +161,17 @@ export default function TechWeekOverlay({
       {/* ===================== LIST MODAL ===================== */}
       {openList && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center   p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          onClick={clickAway(() => setOpenList(false))}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpenList(false);
+          }}
         >
           <div className="relative w-full max-w-6xl h-[90vh] overflow-hidden rounded-2xl shadow-2xl text-white bg-[#0f2d63] flex flex-col">
             {/* Header */}
             <div className="flex items-center gap-2 px-5 py-3 bg-[#0c2653] shrink-0">
-              <h2 className="text-xl font-semibold">Tech Week 2025 — Өнөөдрийн хөтөлбөр</h2>
+              <h2 className="text-xl font-semibold">Tech Week 2025 — Хөтөлбөр</h2>
               <button
                 onClick={() => setOpenList(false)}
                 className="ml-auto h-9 w-9 grid place-items-center rounded-full bg-red-500/90 hover:bg-red-600 text-white"
@@ -138,6 +179,27 @@ export default function TechWeekOverlay({
               >
                 ✕
               </button>
+            </div>
+
+            {/* Day tabs */}
+            <div className="flex gap-2 px-4 py-2 bg-[#0c2653]/70 overflow-x-auto">
+              {dates.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setActiveDate(d)}
+                  className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                    d === activeDate
+                      ? "bg-cyan-400 text-[#063247]"
+                      : "bg-[#163a6b] text-white/85 hover:bg-[#1a447a]"
+                  }`}
+                  title={weekdayMN(d)}
+                >
+                  <div className="leading-tight text-left">
+                    <div className="font-bold">{dotDate(d)}</div>
+                    <div className="text-[10px] opacity-90">{weekdayMN(d)}</div>
+                  </div>
+                </button>
+              ))}
             </div>
 
             {/* Body scrollable */}
@@ -233,10 +295,12 @@ export default function TechWeekOverlay({
           className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
-          onClick={clickAway(() => {
-            setSelected(null);
-            setShowQR(false);
-          })}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelected(null);
+              setShowQR(false);
+            }
+          }}
         >
           <div className="relative w-full max-w-5xl h-[90vh] rounded-xl bg-[#0c2653] text-white shadow-2xl overflow-hidden flex flex-col">
             {/* round X */}
