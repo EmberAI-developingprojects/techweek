@@ -10,9 +10,17 @@ const TOP_SHADE    = "rgba(0, 51, 102, 0.55)";
 const BOTTOM_SHADE = "rgba(0, 30, 70, 0.55)";
 const EDGE_SHADE   = "rgba(0, 0, 40, 0.82)";
 
-/* 🔖 Logo PNG (optional top-wave) */
-const LOGO_SRC = "/logos/logo.png";
-const LOGO_ALT = "TechWeek 2025";
+/* 🔖 Foreground logo */
+const FG_LOGO_SRC = "/logos/techweek_white.png";
+const FG_LOGO_ALT = "TechWeek 2025";
+
+/* ⚙️ Kiosk тохиргоо
+   - Parallax = OFF (pointer байхгүй)
+   - Beams/hex/particles animation = ON (зөөлөн амьд байдал) */
+const FREEZE_ALL = true;
+const ANIMATE_BEAMS = true;
+const tr = (f: number) =>
+  FREEZE_ALL ? "none" : `translate3d(calc(var(--px,0)*${f}px),calc(var(--py,0)*${f}px),0)`;
 
 /* ---- Deterministic PRNG ---- */
 function mulberry32(seed:number){
@@ -33,20 +41,16 @@ export default function TechnologyBackground() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  // pointer parallax
+  // Pointer parallax — kiosk-д OFF
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || FREEZE_ALL) return;
     const el = rootRef.current; if (!el) return;
     let targetX = 0, targetY = 0, curX = 0, curY = 0, raf = 0;
     const setVars = () => {
       el.style.setProperty("--px", curX.toFixed(4));
       el.style.setProperty("--py", curY.toFixed(4));
     };
-    const tick = () => {
-      curX += (targetX - curX) * 0.06;
-      curY += (targetY - curY) * 0.06;
-      setVars(); raf = requestAnimationFrame(tick);
-    };
+    const tick = () => { curX += (targetX - curX) * 0.06; curY += (targetY - curY) * 0.06; setVars(); raf = requestAnimationFrame(tick); };
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width/2, cy = r.top + r.height/2;
@@ -100,7 +104,7 @@ export default function TechnologyBackground() {
         `,
       }}
     >
-      {/* ==== BACKGROUND: SVG glow lines + center logo (rear-most) ==== */}
+      {/* ==== BACKGROUND: SVG glow lines ==== */}
       <div className="absolute inset-0 -z-10 pointer-events-none" style={{ minHeight: "420px" }}>
         <svg
           className="absolute inset-0 w-full h-full block"
@@ -156,41 +160,33 @@ export default function TechnologyBackground() {
           {/* center stem */}
           <path d="M 0 322 V 820" stroke="url(#stem)" strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
 
-          {/* SVG logo (төв дээр) — ЖИЖИГРҮҮЛСЭН */}
-          <image href="/logos/techweek_white.png"
-                 x="-150" y="60" width="300" height="150" preserveAspectRatio="xMidYMid meet" />
+          {/* SVG логог идэвхгүй — foreground дээр тусдаа зураг */}
+          <g opacity="0">
+            <image href="/logos/techweek_white.png" x="-150" y="60" width="300" height="150" preserveAspectRatio="xMidYMid meet" />
+          </g>
         </svg>
-      </div>
-
-      {/* ==== OPTIONAL TOP WAVE LOGO (нуусан) ==== */}
-      <div
-        className="absolute top-0 left-0 w-full h-[180px] flex items-center justify-center pointer-events-none select-none"
-        style={{ transform: "translate3d(calc(var(--px,0)*2px),0,0)", display: "none" }}
-      >
-        <img src={LOGO_SRC} alt={LOGO_ALT} className="h-full w-auto object-contain" />
       </div>
 
       {/* ==== BEAMS ==== */}
       <div
         className="absolute inset-0 opacity-55 mix-blend-screen will-change-transform"
-        style={{ transform: "translate3d(calc(var(--px,0)*6px),calc(var(--py,0)*6px),0)" }}
+        style={{ transform: tr(6) }}
       >
         <div
-          className="absolute -inset-1 bg-[length:200%_200%] animate-[twkGradient_24s_linear_infinite]"
+          className="absolute -inset-1 bg-[length:200%_200%]"
           style={{
             backgroundImage:
               `radial-gradient(900px 260px at 12% 60%, rgba(56,189,248,.18), transparent 60%),
                radial-gradient(900px 260px at 88% 40%, rgba(59,130,246,.16), transparent 60%),
                linear-gradient(105deg, rgba(56,189,248,.08), rgba(59,130,246,.05) 60%)`,
+            animation: ANIMATE_BEAMS ? "twkGradient 24s linear infinite" : "none",
+            backgroundPosition: "50% 50%"
           }}
         />
       </div>
 
       {/* ==== HEX CELLS ==== */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-55 will-change-transform"
-        style={{ transform: "translate3d(calc(var(--px,0)*6px),calc(var(--py,0)*6px),0)" }}
-      >
+      <div className="absolute inset-0 pointer-events-none opacity-55 will-change-transform" style={{ transform: tr(6) }}>
         <svg viewBox="0 0 1000 620" className="w-full h-full">
           <defs>
             <linearGradient id="hx" x1="0" y1="0" x2="1" y2="0">
@@ -199,34 +195,15 @@ export default function TechnologyBackground() {
             </linearGradient>
           </defs>
           {hexes.map((h, idx) => (
-            <polygon
-              key={idx}
-              points={h.points}
-              fill="transparent"
-              stroke="url(#hx)"
-              strokeWidth="0.7"
-              className="[stroke-dasharray:12]"
-              opacity={0.9}
-            >
-              <animateTransform
-                attributeName="transform"
-                type="translate"
-                dur={`${h.dur}s`}
-                begin={`${h.delay}s`}
-                repeatCount="indefinite"
-                values={`0 0; ${h.ax} ${h.ay}; 0 0`}
-                keyTimes="0; 0.5; 1"
-              />
+            <polygon key={idx} points={h.points} fill="transparent" stroke="url(#hx)" strokeWidth="0.7" className="[stroke-dasharray:12]" opacity={0.9}>
+              <animateTransform attributeName="transform" type="translate" dur={`${h.dur}s`} begin={`${h.delay}s`} repeatCount="indefinite" values={`0 0; ${h.ax} ${h.ay}; 0 0`} keyTimes="0; 0.5; 1" />
             </polygon>
           ))}
         </svg>
       </div>
 
       {/* ==== NETWORK ==== */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-60 will-change-transform"
-        style={{ transform: "translate3d(calc(var(--px,0)*7px),calc(var(--py,0)*7px),0)" }}
-      >
+      <div className="absolute inset-0 pointer-events-none opacity-60 will-change-transform" style={{ transform: tr(7) }}>
         <svg viewBox="0 0 1000 1000" className="w-full h-full">
           {links.map((e,i)=>(<line key={i} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="#6dd3ff" strokeOpacity="0.14" strokeWidth="0.5"/>))}
           {nodes.map((n,i)=>(<circle key={i} cx={n.x*10} cy={n.y*10} r={n.r} fill="#8be9ff" opacity="0.9"/>))}
@@ -234,59 +211,92 @@ export default function TechnologyBackground() {
       </div>
 
       {/* ==== PARTICLES ==== */}
-      <div
-        className="absolute inset-0 will-change-transform"
-        style={{ transform: "translate3d(calc(var(--px,0)*5px),calc(var(--py,0)*5px),0)" }}
-      >
+      <div className="absolute inset-0 will-change-transform" style={{ transform: tr(5) }}>
         {particles.map((p,i)=>(
           <span
             key={i}
             className="absolute block rounded-full bg-cyan-300/70 shadow-[0_0_6px_rgba(56,189,248,.7)] animate-[twkTwinkle_4.8s_ease-in-out_infinite]"
-            style={{
-              width:`${p.w}px`,
-              height:`${p.h}px`,
-              left:`${p.l}%`,
-              top:`${p.t}%`,
-              animationDelay:`${p.d}s`
-            }}
+            style={{ width:`${p.w}px`, height:`${p.h}px`, left:`${p.l}%`, top:`${p.t}%`, animationDelay:`${p.d}s` }}
           />
         ))}
       </div>
 
-      {/* ==== BUTTONS (edge-aligned, no-zoom) ==== */}
-      <div className="absolute inset-x-0 top-[260px] z-20 pointer-events-auto px-6">
-        <div className="flex w-full items-center justify-between gap-4">
-          <Link
-            href="/techweek"
-            className="px-8 py-3 rounded-full font-semibold text-white
-                       bg-gradient-to-r from-orange-400 to-orange-600
-                       border border-orange-300/50 shadow-lg shadow-orange-500/30
-                       backdrop-blur-sm
-                       transform-none hover:scale-[1]
-                       transition-shadow duration-200 hover:shadow-orange-500/50
-                       focus:outline-none focus:ring-2 focus:ring-orange-300/60"
-          >
-            Tech Week
-          </Link>
+      {/* ==== FOREGROUND (лого + товч) — 1080×1920 portrait-д түгжсэн layout ==== */}
+      <div className="absolute inset-0 z-20 pointer-events-none">
+        <div
+          className="h-full mx-auto grid kiosk-grid px-[5vw]"
+          style={{
+            // 1080×1920 = 9:16; үүнээс нарийвтар дэлгэцэнд ч тогтвортой
+            maxWidth: "1050px",
+            gridTemplateRows: "14vh 16vh 1fr" // top spacer, logo, rest
+          }}
+        >
+          <div /> {/* top spacer */}
 
-          <Link
-            href="/ict-forum"
-            className="px-8 py-3 rounded-full font-semibold text-white
-                       bg-gradient-to-r from-cyan-400 to-cyan-600
-                       border border-cyan-300/50 shadow-lg shadow-cyan-500/30
-                       backdrop-blur-sm
-                       transform-none hover:scale-[1]
-                       transition-shadow duration-200 hover:shadow-cyan-500/50
-                       focus:outline-none focus:ring-2 focus:ring-cyan-300/60"
-          >
-            ICT Forum
-          </Link>
+          {/* Logo (жижиг, төв) */}
+          <div className="grid place-items-center">
+            <img
+              src={FG_LOGO_SRC}
+              alt={FG_LOGO_ALT}
+              className="pointer-events-none select-none kiosk-logo"
+              style={{
+                height: "12vh",
+                width: "auto",
+                filter: "drop-shadow(0 6px 24px rgba(0,0,0,.35))"
+              }}
+            />
+          </div>
+
+          {/* Buttons — хоёр ирмэгт, hover scale байхгүй */}
+          <div className="pointer-events-auto flex items-start justify-between">
+            <Link
+              href="/techweek"
+              className="px-[4.8vw] py-3 rounded-full font-semibold text-white
+                         bg-gradient-to-r from-orange-400 to-orange-600
+                         border border-orange-300/50 shadow-lg shadow-orange-500/30
+                         backdrop-blur-sm transform-none hover:scale-[1]
+                         transition-shadow duration-200 hover:shadow-orange-500/50
+                         focus:outline-none focus:ring-2 focus:ring-orange-300/60
+                         text-base"
+            >
+              Tech Week
+            </Link>
+
+            <Link
+              href="/ict-forum"
+              className="px-[4.8vw] py-3 rounded-full font-semibold text-white
+                         bg-gradient-to-r from-cyan-400 to-cyan-600
+                         border border-cyan-300/50 shadow-lg shadow-cyan-500/30
+                         backdrop-blur-sm transform-none hover:scale-[1]
+                         transition-shadow duration-200 hover:shadow-cyan-500/50
+                         focus:outline-none focus:ring-2 focus:ring-cyan-300/60
+                         text-base"
+            >
+              ICT Forum
+            </Link>
+          </div>
         </div>
       </div>
 
       <style jsx>{`
         @keyframes twkGradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
         @keyframes twkTwinkle{0%,100%{opacity:.3;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+
+        /* 1080×1920 болон түүнтэй төстэй portrait-д илүү шахалт */
+        @media (max-aspect-ratio: 9/16) {
+          .kiosk-grid {
+            max-width: 980px;
+            grid-template-rows: 15vh 14vh 1fr !important;
+            padding-left: 4vw; padding-right: 4vw;
+          }
+          .kiosk-logo { height: 11vh !important; }
+        }
+
+        /* Маш өндөр (илүү нарийхан) дэлгэцэнд */
+        @media (max-aspect-ratio: 9/18) {
+          .kiosk-grid { grid-template-rows: 16vh 13vh 1fr !important; }
+          .kiosk-logo { height: 10vh !important; }
+        }
       `}</style>
     </div>
   );
@@ -299,7 +309,7 @@ function hexScatterFloat(opts:{
   const { count, minSize, maxSize, viewW, viewH, rand } = opts;
   const items: HexItem[] = [];
   const minDist = 120;
-  let tries = 0; const MAX_TRIES = count * 120;
+  let tries = 0, MAX_TRIES = count * 120;
 
   while (items.length < count && tries < MAX_TRIES) {
     tries++;
