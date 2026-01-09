@@ -1,7 +1,7 @@
 // app/virtual-bus/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import TechBlueBackground from "@/components/TechBlueBackground";
 
@@ -20,12 +20,12 @@ export default function VirtualBusPage() {
       ? "Виртуал бүс гэж юу вэ?"
       : "";
 
-  const modalImgSrc =
-    modal === "signup"
-      ? "/images/signup.png"
-      : modal === "desc"
-      ? "/images/desc.png"
-      : "";
+  // ✅ олон зураг дэмжих
+  const modalImages = useMemo(() => {
+    if (modal === "desc") return ["/images/desc1.png", "/images/desc2.png"];
+    if (modal === "signup") return ["/images/signup1.png", "/images/signup2.png"];
+    return [];
+  }, [modal]);
 
   // Modal нээгдсэн үед ESC дарвал хаагдана
   useEffect(() => {
@@ -39,10 +39,8 @@ export default function VirtualBusPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* зөвхөн цэнхэр background */}
       <TechBlueBackground />
 
-      {/* дээр нь UI */}
       <div className="pointer-events-none absolute inset-0 z-[50]">
         <button
           type="button"
@@ -57,7 +55,6 @@ export default function VirtualBusPage() {
         </button>
 
         <div className="absolute left-1/2 top-[18vh] w-[min(86vw,560px)] -translate-x-1/2">
-          {/* ===== Title LOGO (virtualzone.png) ===== */}
           <div className="flex items-center justify-center gap-3">
             <img
               src="/logos/virtualzone.png"
@@ -69,7 +66,6 @@ export default function VirtualBusPage() {
           </div>
 
           <div className="mt-10 flex flex-col gap-5">
-            {/* ✅ ОДОО route биш — modal нээнэ */}
             <button
               type="button"
               className="pointer-events-auto h-12 w-full rounded-full
@@ -81,7 +77,6 @@ export default function VirtualBusPage() {
               ВИРТУАЛ БҮС ГЭЖ ЮУ ВЭ?
             </button>
 
-            {/* ✅ энэ нь signup modal */}
             <button
               type="button"
               className="pointer-events-auto h-12 w-full rounded-full
@@ -95,16 +90,13 @@ export default function VirtualBusPage() {
           </div>
         </div>
 
-        {/* =========================
-            MODAL (desc.png / signup.png)
-           ========================= */}
+        {/* MODAL */}
         {isOpen && (
           <div
             className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center"
             aria-modal="true"
             role="dialog"
           >
-            {/* overlay (click to close) */}
             <button
               type="button"
               className="absolute inset-0 bg-black/55"
@@ -112,15 +104,12 @@ export default function VirtualBusPage() {
               aria-label="Close modal"
             />
 
-            {/* modal box */}
             <div className="relative w-[min(92vw,760px)] max-h-[88vh] overflow-hidden rounded-2xl border border-white/10 bg-[#071a3d]/85 shadow-[0_20px_80px_rgba(0,0,0,.55)]">
-              {/* header */}
               <div className="relative flex items-center justify-center px-5 py-4">
                 <div className="text-white font-semibold tracking-wide">
                   {modalTitle}
                 </div>
 
-                {/* close button (улаан X) */}
                 <button
                   type="button"
                   onClick={() => setModal(null)}
@@ -134,14 +123,19 @@ export default function VirtualBusPage() {
                 </button>
               </div>
 
-              {/* content (scrollable) */}
+              {/* ✅ content (scrollable) — олон зураг */}
               <div className="max-h-[calc(88vh-56px)] overflow-auto p-4">
-                <img
-                  src={modalImgSrc}
-                  alt={modalTitle}
-                  className="w-full h-auto rounded-xl"
-                  draggable={false}
-                />
+                <div className="flex flex-col gap-4">
+                  {modalImages.map((src, i) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`${modalTitle} ${i + 1}`}
+                      className="w-full h-auto rounded-xl"
+                      draggable={false}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
