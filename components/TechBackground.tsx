@@ -1,12 +1,11 @@
 // components/TechBackground.tsx
 "use client";
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
-;
 import TechWeekOverlay from "@/components/TechWeekOverlay";
 import AvatarVideoFixed from "@/components/AvatarVideoFixed";
 import ICTForumOverlay from "@/components/ICTForumOverlay";
 import ClientPortal from "@/components/ClientPortal";
-
 
 /* 🎨 Background */
 const BASE_COLOR = "#0d2c63";
@@ -15,7 +14,7 @@ const BOTTOM_SHADE = "rgba(0, 30, 70, 0.55)";
 const EDGE_SHADE = "rgba(0, 0, 40, 0.82)";
 
 /* 🔖 Foreground logo */
-const FG_LOGO_SRC = "/logos/techweek_white.png";
+const FG_LOGO_SRC = "/logos/toplogo.png";
 const FG_LOGO_ALT = "TechWeek 2025";
 
 /* ⚙️ Kiosk */
@@ -37,6 +36,7 @@ function mulberry32(seed: number) {
 }
 const round3 = (n: number) => Math.round(n * 1000) / 1000;
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
 type HexItem = {
   points: string;
   ax: number;
@@ -48,6 +48,7 @@ type HexItem = {
 export default function TechnologyBackground() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -57,21 +58,25 @@ export default function TechnologyBackground() {
     if (!mounted || FREEZE_ALL) return;
     const el = rootRef.current;
     if (!el) return;
+
     let targetX = 0,
       targetY = 0,
       curX = 0,
       curY = 0,
       raf = 0;
+
     const setVars = () => {
       el.style.setProperty("--px", curX.toFixed(4));
       el.style.setProperty("--py", curY.toFixed(4));
     };
+
     const tick = () => {
       curX += (targetX - curX) * 0.06;
       curY += (targetY - curY) * 0.06;
       setVars();
       raf = requestAnimationFrame(tick);
     };
+
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2,
@@ -79,8 +84,10 @@ export default function TechnologyBackground() {
       targetX = (e.clientX - cx) / (r.width / 2);
       targetY = (e.clientY - cy) / (r.height / 2);
     };
+
     raf = requestAnimationFrame(tick);
     window.addEventListener("pointermove", onMove, { passive: true });
+
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
@@ -89,8 +96,10 @@ export default function TechnologyBackground() {
 
   /* ---------- Client-side generated data ---------- */
   const { particles, nodes, links, hexes } = useMemo(() => {
-    if (!mounted)
+    if (!mounted) {
       return { particles: [], nodes: [], links: [], hexes: [] as HexItem[] };
+    }
+
     const rand = mulberry32(20250921);
 
     const parts = Array.from({ length: 70 }).map(() => ({
@@ -112,6 +121,7 @@ export default function TechnologyBackground() {
         r: 1 + Math.floor(rand() * 2),
       };
     });
+
     const ls = ns.flatMap((n, i) => [
       {
         x1: n.x * 10,
@@ -127,7 +137,7 @@ export default function TechnologyBackground() {
       },
     ]);
 
-    const hexes = hexScatterFloat({
+    const hx = hexScatterFloat({
       count: 22,
       minSize: 70,
       maxSize: 90,
@@ -136,7 +146,7 @@ export default function TechnologyBackground() {
       rand,
     });
 
-    return { particles: parts, nodes: ns, links: ls, hexes };
+    return { particles: parts, nodes: ns, links: ls, hexes: hx };
   }, [mounted]);
 
   return (
@@ -149,7 +159,7 @@ export default function TechnologyBackground() {
           radial-gradient(120% 80% at 50% 0%, ${TOP_SHADE}, transparent 60%),
           radial-gradient(90% 85% at 50% 100%, ${BOTTOM_SHADE}, ${EDGE_SHADE})
         `,
-        isolation: "isolate", // blending/blur алдагдуулахгүй
+        isolation: "isolate",
       }}
     >
       {/* ==== BACKGROUND: PORTRAIT SVG (1080×1920) ==== */}
@@ -164,6 +174,7 @@ export default function TechnologyBackground() {
             <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
               <feGaussianBlur stdDeviation="8" />
             </filter>
+
             <linearGradient
               id="lineOrange"
               gradientUnits="userSpaceOnUse"
@@ -176,6 +187,7 @@ export default function TechnologyBackground() {
               <stop offset=".55" stopColor="rgba(255,165,0,0.95)" />
               <stop offset="1" stopColor="rgba(255,165,0,0)" />
             </linearGradient>
+
             <linearGradient
               id="lineCyan"
               gradientUnits="userSpaceOnUse"
@@ -188,6 +200,7 @@ export default function TechnologyBackground() {
               <stop offset=".55" stopColor="rgba(0,212,255,0.95)" />
               <stop offset="1" stopColor="rgba(0,212,255,0)" />
             </linearGradient>
+
             <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor="#66E0FF" stopOpacity=".45" />
               <stop offset="1" stopColor="#66E0FF" stopOpacity="0" />
@@ -265,8 +278,8 @@ export default function TechnologyBackground() {
           className="absolute -inset-1 bg-[length:200%_200%]"
           style={{
             backgroundImage: `radial-gradient(900px 420px at 18% 48%, rgba(56,189,248,.35), transparent 70%),
-                  radial-gradient(900px 420px at 82% 36%, rgba(59,130,246,.30), transparent 70%),
-                  linear-gradient(120deg, rgba(56,189,248,.15), rgba(59,130,246,.12) 60%)`,
+              radial-gradient(900px 420px at 82% 36%, rgba(59,130,246,.30), transparent 70%),
+              linear-gradient(120deg, rgba(56,189,248,.15), rgba(59,130,246,.12) 60%)`,
             animation: ANIMATE_BEAMS
               ? "twkGradient 12s linear infinite"
               : "none",
@@ -288,6 +301,7 @@ export default function TechnologyBackground() {
               <stop offset="1" stopColor="#00bfff" />
             </linearGradient>
           </defs>
+
           {hexes.map((h, idx) => (
             <polygon
               key={idx}
@@ -381,47 +395,143 @@ export default function TechnologyBackground() {
           />
         </div>
 
-      <AvatarVideoFixed
-  src="/media/newmodel.webm"
-  left="50%"
-  headroomVh={24}   // логогийн доор үлдэх зай; 22–28 хооронд тааруулж болно
-  zoom={1.03}       // доороос түгжээтэй бага зэргийн томролт (сонголт)
-  z={75}            // товчноос доор, товч нь дээр харагдана
-  ignorePointer
-/>
-<ClientPortal>
-  <div
-    className="pointer-events-auto"  // parent нь pointerEvents:none тул энд идэвхжүүлнэ
-    style={{
-      position: "absolute",
-      top: "56vh",
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "min(66vw, 800px)",
-      display: "flex",
-      justifyContent: "space-between",
-      // ямар ч blur/blend нөлөөгүй байх хамгаалалтууд:
-      mixBlendMode: "normal",
-      isolation: "isolate",
-      WebkitBackdropFilter: "none",
-      backdropFilter: "none",
-    }}
-  >
-    <TechWeekOverlay
-      label="Tech Week"
-      triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
-                        bg-gradient-to-r from-orange-400 to-orange-600
-                        border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
-                        hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
-                        mix-blend-normal"
-    />
-    <ICTForumOverlay />
-  </div>
-  
-</ClientPortal>
+        <AvatarVideoFixed
+          src="/media/newmodel.webm"
+          left="50%"
+          headroomVh={24}
+          zoom={1.03}
+          z={75}
+          ignorePointer
+        />
 
+        <ClientPortal>
+          <div
+            className="pointer-events-auto"
+            style={{
+              position: "absolute",
+              top: "56vh",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "min(66vw, 860px)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "18px",
+              mixBlendMode: "normal",
+              isolation: "isolate",
+              WebkitBackdropFilter: "none",
+              backdropFilter: "none",
+            }}
+          >
+            {/* ===== 1-р мөр: TechWeek + ICT Forum ===== */}
+            <div className="flex items-center justify-between gap-4">
+              <TechWeekOverlay
+                label="Tech Week"
+                triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
+                bg-gradient-to-r from-orange-400 to-orange-600
+                border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
+                hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
+                mix-blend-normal"
+              />
+              <ICTForumOverlay />
+            </div>
+
+            {/* ===== 2-р мөр: IMAGE pill buttons (IT Park + Virtual zone) ===== */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* IT Park */}
+              <button
+                type="button"
+                className="group relative flex items-center justify-center
+                h-[64px] w-full rounded-full
+                border border-white/35 bg-white/10
+                shadow-[0_10px_35px_rgba(0,0,0,.28)]
+                backdrop-blur-[2px]
+                hover:bg-white/14 hover:border-white/45
+                focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                onClick={() => console.log("itpark")}
+                aria-label="IT Park"
+              >
+                <img
+                  src="/logos/itpark.png"
+                  alt="IT Park"
+                  className="h-[34px] w-auto select-none pointer-events-none
+                  drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
+                  group-hover:scale-[1.01] transition-transform"
+                  draggable={false}
+                />
+              </button>
+
+              {/* Virtual zone */}
+              <button
+                type="button"
+                className="group relative flex items-center justify-center
+                h-[64px] w-full rounded-full
+                border border-white/35 bg-white/10
+                shadow-[0_10px_35px_rgba(0,0,0,.28)]
+                backdrop-blur-[2px]
+                hover:bg-white/14 hover:border-white/45
+                focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                onClick={() => console.log("virtualzone")}
+                aria-label="Виртуал бүс"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/logos/virtualzone.png"
+                    alt="Виртуал бүс"
+                    className="h-[34px] w-auto select-none pointer-events-none
+                    drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
+                    group-hover:scale-[1.01] transition-transform"
+                    draggable={false}
+                  />
+                  <span className="h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,.85)]" />
+                </div>
+              </button>
+              {/* EXTRA 1: Image pill button */}
+              <button
+                type="button"
+                className="group relative flex items-center justify-center
+      h-[64px] w-full rounded-full
+      border border-white/35 bg-white/10
+      shadow-[0_10px_35px_rgba(0,0,0,.28)]
+      backdrop-blur-[2px]
+      hover:bg-white/14 hover:border-white/45
+      focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                onClick={() => console.log("extra-image")}
+                aria-label="Extra Image Button"
+              >
+                <img
+                  src="/logos/khurdan.png" // ✅ ЭНД өөрийн зургаа солиорой
+                  alt="Extra"
+                  className="h-[34px] w-auto select-none pointer-events-none
+        drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
+        group-hover:scale-[1.01] transition-transform"
+                  draggable={false}
+                />
+              </button>
+
+              {/* EXTRA 2: Text pill button */}
+              <button
+                type="button"
+                className="group relative flex items-center justify-center
+      h-[64px] w-full rounded-full
+      border border-white/35 bg-white/10
+      shadow-[0_10px_35px_rgba(0,0,0,.28)]
+      backdrop-blur-[2px]
+      hover:bg-white/14 hover:border-white/45
+      focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                onClick={() => console.log("extra-text")}
+                aria-label="Extra Text Button"
+              >
+                <span
+                  className="text-[18px] font-semibold tracking-wide text-white/95
+        drop-shadow-[0_6px_14px_rgba(0,0,0,.35)]"
+                >
+                  Дохионы хэл
+                </span>
+              </button>
+            </div>
+          </div>
+        </ClientPortal>
       </div>
-
     </div>
   );
 }
@@ -471,12 +581,14 @@ function hexScatterFloat(opts: {
   }
   return items;
 }
+
 function itAx(it: HexItem) {
   return parseFloat(it.points.split(" ")[0].split(",")[0]);
 }
 function itAy(it: HexItem) {
   return parseFloat(it.points.split(" ")[0].split(",")[1]);
 }
+
 function hexPoints(cx: number, cy: number, r: number) {
   const pts: string[] = [];
   for (let i = 0; i < 6; i++) {
