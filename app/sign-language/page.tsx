@@ -7,7 +7,7 @@ import TechBlueBackground from "@/components/TechBlueBackground";
 
 function PlayIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden>
+    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white" aria-hidden>
       <path d="M8 5v14l11-7z" />
     </svg>
   );
@@ -16,14 +16,12 @@ function PlayIcon() {
 export default function SignLanguagePage() {
   const router = useRouter();
 
-  // ✅ paths (public/ дотор байх ёстой)
   const VIDEO_1 = "/videos/sign1.mp4";
   const VIDEO_2 = "/videos/sign2.mp4";
   const VIDEO_3 = "/videos/sign3.mp4";
   const VIDEO_4 = "/videos/video5.mp4";
   const IMAGE_1 = "/images/sign.jpg";
 
-  // ✅ нэг видео тоглоход бусдыг pause болгох
   const vRefs = useRef<Array<HTMLVideoElement | null>>([]);
 
   const pauseAll = () => {
@@ -39,115 +37,112 @@ export default function SignLanguagePage() {
     vRefs.current[idx] = el;
   };
 
+  const goBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/"); // үндсэн route өөр бол энд солиорой
+    }
+  };
+
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative h-[100svh] w-full overflow-hidden">
       <TechBlueBackground />
 
+      {/* BACK */}
+      <button
+        type="button"
+        onClick={goBack}
+        className="fixed left-6 z-[200] grid h-14 w-14 place-items-center
+                   rounded-lg bg-emerald-700/95 text-white text-3xl font-bold leading-none
+                   shadow-[0_12px_30px_rgba(0,0,0,.4)]
+                   hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-300/40"
+        aria-label="Back"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 44px)" }}
+      >
+        ‹
+      </button>
+
+      {/* CONTENT */}
       <div className="pointer-events-none absolute inset-0 z-[50]">
-        {/* back */}
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="pointer-events-auto absolute left-5 top-5 grid h-10 w-10 place-items-center
-                     rounded-md bg-emerald-700/95 text-white
-                     shadow-[0_10px_25px_rgba(0,0,0,.35)]
-                     hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-300/40"
-          aria-label="Back"
-        >
-          ‹
-        </button>
-
-        {/* content */}
-        <div className="pointer-events-auto absolute left-1/2 top-[12vh] w-[min(92vw,900px)] -translate-x-1/2">
-          {/* title */}
-          <div className="flex items-center justify-center">
-            <h1 className="text-white text-3xl font-semibold tracking-wide drop-shadow-[0_10px_28px_rgba(0,0,0,.45)]">
-              Дохионы хэл
-            </h1>
-          </div>
-
-          {/* ✅ GRID: дандаа 1 багана (доошоо дарааллаад) */}
-          <div className="mt-8 grid grid-cols-1 gap-5">
-            {/* video 1 */}
-            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-              <div className="relative overflow-hidden rounded-xl">
+        <div className="pointer-events-auto absolute inset-0 px-4">
+          <div
+            className="mx-auto w-full"
+            style={{
+              maxWidth: "980px",
+              paddingTop: "calc(env(safe-area-inset-top, 0px) + 18px)",
+              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
+            }}
+          >
+            {/* scroll байхгүй — 5 tile-ийг flex-ээр тэнцүү хуваана */}
+            <div
+              className="mt-4 flex flex-col gap-3"
+              style={{
+                height:
+                  "calc(100svh - (env(safe-area-inset-top, 0px) + 44px) - (env(safe-area-inset-bottom, 0px) + 28px) - 28px)",
+              }}
+            >
+              {/* VIDEO 1 */}
+              <Tile43>
                 <video
                   ref={attachRef(0)}
-                  className="w-full aspect-video object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_1} />
                 </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[0]}
-                />
-              </div>
-            </div>
+                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[0]} />
+              </Tile43>
 
-            {/* video 2 */}
-            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-              <div className="relative overflow-hidden rounded-xl">
+              {/* VIDEO 2 */}
+              <Tile43>
                 <video
                   ref={attachRef(1)}
-                  className="w-full aspect-video object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_2} />
                 </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[1]}
-                />
-              </div>
-            </div>
+                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[1]} />
+              </Tile43>
 
-            {/* video 3 */}
-            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-              <div className="relative overflow-hidden rounded-xl">
+              {/* VIDEO 3 */}
+              <Tile43>
                 <video
                   ref={attachRef(2)}
-                  className="w-full aspect-video object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_3} />
                 </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[2]}
-                />
-              </div>
-            </div>
+                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[2]} />
+              </Tile43>
 
-            {/* video 4 */}
-            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-              <div className="relative overflow-hidden rounded-xl">
+              {/* VIDEO 4 */}
+              <Tile43>
                 <video
                   ref={attachRef(3)}
-                  className="w-full aspect-video object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_4} />
                 </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[3]}
-                />
-              </div>
-            </div>
+                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[3]} />
+              </Tile43>
 
-            {/* image (бас доошоо дарааллаад нэг мөрөнд) */}
-            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-              <img
-                src={IMAGE_1}
-                alt="Дохионы хэл зураг"
-                className="w-full rounded-xl"
-                draggable={false}
-              />
+              {/* IMAGE */}
+              <Tile43>
+                <img
+                  src={IMAGE_1}
+                  alt="Дохионы хэл зураг"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  draggable={false}
+                />
+              </Tile43>
             </div>
           </div>
         </div>
@@ -156,10 +151,17 @@ export default function SignLanguagePage() {
   );
 }
 
-/**
- * Video дээр play icon overlay + click-to-toggle
- * (controls ашиглахгүй)
- */
+/* ===== 4:3 TILE (scroll-гүй байлгахын тулд flex-1 + aspect) ===== */
+function Tile43({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-0 flex-1 aspect-[4/3]
+                    rounded-2xl border border-white/12 bg-white/8 p-2
+                    shadow-[0_18px_60px_rgba(0,0,0,.35)] overflow-hidden">
+      {children}
+    </div>
+  );
+}
+
 function VideoOverlay({
   getVideo,
   pauseOthers,
@@ -186,7 +188,6 @@ function VideoOverlay({
       v.removeEventListener("pause", onPause);
       v.removeEventListener("ended", onEnded);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggle = async () => {
@@ -205,7 +206,6 @@ function VideoOverlay({
 
   return (
     <>
-      {/* click layer */}
       <button
         type="button"
         onClick={toggle}
@@ -213,11 +213,10 @@ function VideoOverlay({
         aria-label={playing ? "Pause video" : "Play video"}
       />
 
-      {/* play icon */}
       {!playing && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
           <div
-            className="grid h-16 w-16 place-items-center rounded-full
+            className="grid h-12 w-12 place-items-center rounded-full
                        bg-black/45 backdrop-blur-[2px]
                        shadow-[0_18px_50px_rgba(0,0,0,.45)]"
           >
