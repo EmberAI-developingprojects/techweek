@@ -86,52 +86,64 @@ export default function SignLanguagePage() {
               <Tile43>
                 <video
                   ref={attachRef(0)}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_1} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[0]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[0]}
+                />
               </Tile43>
 
               {/* VIDEO 2 */}
               <Tile43>
                 <video
                   ref={attachRef(1)}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_2} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[1]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[1]}
+                />
               </Tile43>
 
               {/* VIDEO 3 */}
               <Tile43>
                 <video
                   ref={attachRef(2)}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_3} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[2]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[2]}
+                />
               </Tile43>
 
-              {/* VIDEO 4 */}
+              {/* VIDEO 4 (✅ жаахан томруулсан) */}
               <Tile43>
                 <video
                   ref={attachRef(3)}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain scale-[1.12] origin-center"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_4} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[3]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[3]}
+                />
               </Tile43>
 
               {/* IMAGE */}
@@ -139,7 +151,7 @@ export default function SignLanguagePage() {
                 <img
                   src={IMAGE_1}
                   alt="Дохионы хэл зураг"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                   draggable={false}
                 />
               </Tile43>
@@ -151,12 +163,13 @@ export default function SignLanguagePage() {
   );
 }
 
-/* ===== 4:3 TILE (scroll-гүй байлгахын тулд flex-1 + aspect) ===== */
+/* ✅ BOX-уудыг арилгасан: border/bg/shadow байхгүй, зөвхөн 4:3 + overflow
+   ✅ Буланг бага зэрэг илүү дугуй болгосон */
 function Tile43({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-0 flex-1 aspect-[4/3]
-                    rounded-2xl border border-white/12 bg-white/8 p-2
-                    shadow-[0_18px_60px_rgba(0,0,0,.35)] overflow-hidden">
+    <div
+      className="relative min-h-0 flex-1 aspect-[4/3] overflow-hidden rounded-[22px] sm:rounded-[26px]"
+    >
       {children}
     </div>
   );
