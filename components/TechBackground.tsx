@@ -488,7 +488,7 @@ export default function TechnologyBackground() {
                     className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                     draggable={false}
                   />
-                  <span className="h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,.85)]" />
+                  
                 </div>
               </button>
 
