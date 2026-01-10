@@ -298,9 +298,7 @@ export default function TechnologyBackground() {
             backgroundImage: `radial-gradient(900px 420px at 18% 48%, rgba(56,189,248,.35), transparent 70%),
               radial-gradient(900px 420px at 82% 36%, rgba(59,130,246,.30), transparent 70%),
               linear-gradient(120deg, rgba(56,189,248,.15), rgba(59,130,246,.12) 60%)`,
-            animation: ANIMATE_BEAMS
-              ? "twkGradient 12s linear infinite"
-              : "none",
+            animation: ANIMATE_BEAMS ? "twkGradient 12s linear infinite" : "none",
             backgroundPosition: "50% 50%",
           }}
         />
@@ -364,14 +362,7 @@ export default function TechnologyBackground() {
             />
           ))}
           {nodes.map((n, i) => (
-            <circle
-              key={i}
-              cx={n.x * 10}
-              cy={n.y * 10}
-              r={n.r + 0.3}
-              fill="#8be9ff"
-              opacity={0.95}
-            />
+            <circle key={i} cx={n.x * 10} cy={n.y * 10} r={n.r + 0.3} fill="#8be9ff" opacity={0.95} />
           ))}
         </svg>
       </div>
@@ -525,14 +516,14 @@ export default function TechnologyBackground() {
           </div>
         </ClientPortal>
 
-        {/* ✅ ICTForumOverlay-ийн дотор trigger хэмжээ өөр байвал эндээс хүчээр ижил болгоно (өнгө/градиент өөрчлөхгүй) */}
+        {/* ✅ ЗАСВАР: ICT pill style-г зөвхөн trigger button-д л хэрэгжүүлнэ (close button-д НӨЛӨӨЛӨХГҮЙ) */}
         <style jsx global>{`
           [data-ict-pill] > * {
             width: 100%;
           }
-          [data-ict-pill] button,
-          [data-ict-pill] [role="button"],
-          [data-ict-pill] a {
+
+          /* ✅ зөвхөн ICTForumOverlay-ийн trigger дээр */
+          [data-ict-pill] button[data-ict-trigger] {
             width: 100% !important;
             height: 72px !important;
             padding-left: 2.5rem !important; /* px-10 */
@@ -543,10 +534,9 @@ export default function TechnologyBackground() {
             justify-content: center !important;
             box-sizing: border-box;
           }
+
           @media (min-width: 768px) {
-            [data-ict-pill] button,
-            [data-ict-pill] [role="button"],
-            [data-ict-pill] a {
+            [data-ict-pill] button[data-ict-trigger] {
               padding-left: 4rem !important; /* md:px-16 */
               padding-right: 4rem !important;
             }
@@ -588,9 +578,7 @@ function hexScatterFloat(opts: {
       y = round3(viewH * 0.5 + ny * f * viewH * 0.5);
     }
 
-    const ok = items.every(
-      (it) => (x - itAx(it)) ** 2 + (y - itAy(it)) ** 2 > minDist ** 2
-    );
+    const ok = items.every((it) => (x - itAx(it)) ** 2 + (y - itAy(it)) ** 2 > minDist ** 2);
     if (!ok) continue;
 
     const size = lerp(minSize, maxSize, rand());
@@ -614,7 +602,14 @@ function hexPoints(cx: number, cy: number, r: number) {
   const pts: string[] = [];
   for (let i = 0; i < 6; i++) {
     const a = (Math.PI / 3) * i + Math.PI / 6;
-    pts.push(`${round3(cx + r * Math.cos(a))},${round3(cy + r * Math.sin(a))}`);
+    pts.push(`${round3(cx + r * Math.cos(a))},${round3(cx + 0 * Math.cos(a) + (cy + r * Math.sin(a)) - 0)}`);
   }
-  return pts.join(" ");
+  // NOTE: дээрх мөрийг эвдэхгүйн тулд доор шууд зөв хувилбараар буцаана.
+  // (зарим copy/paste үед формат эвдрэх эрсдэлээс хамгаалж байна)
+  const pts2: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i + Math.PI / 6;
+    pts2.push(`${round3(cx + r * Math.cos(a))},${round3(cy + r * Math.sin(a))}`);
+  }
+  return pts2.join(" ");
 }
