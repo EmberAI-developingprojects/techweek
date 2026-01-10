@@ -161,7 +161,7 @@ export default function TechnologyBackground() {
 
   // Bottom 4-ийн өмнөх glass styling-ийг ХАДГАЛНА (өнгө өөрчлөхгүй)
   const PILL_GLASS =
-    "bg-[#061633] border border-white/30 " +
+    "bg-[#0041b7] border border-white/30 " +
     "shadow-[0_10px_35px_rgba(0,0,0,.35)] backdrop-blur-[3px] " +
     "hover:bg-[#0a2450]/70 hover:border-white/40 focus:outline-none focus:ring-4 focus:ring-cyan-300/35";
 
