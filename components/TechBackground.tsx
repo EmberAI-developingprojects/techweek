@@ -161,9 +161,9 @@ export default function TechnologyBackground() {
 
   // Bottom 4-ийн өмнөх glass styling-ийг ХАДГАЛНА (өнгө өөрчлөхгүй)
   const PILL_GLASS =
-    "bg-white/10 border border-white/35 " +
-    "shadow-[0_10px_35px_rgba(0,0,0,.28)] backdrop-blur-[2px] " +
-    "hover:bg-white/14 hover:border-white/45 focus:outline-none focus:ring-4 focus:ring-cyan-300/35";
+    "bg-[#061633] border border-white/30 " +
+    "shadow-[0_10px_35px_rgba(0,0,0,.35)] backdrop-blur-[3px] " +
+    "hover:bg-[#0a2450]/70 hover:border-white/40 focus:outline-none focus:ring-4 focus:ring-cyan-300/35";
 
   const PILL_BASE = `${PILL_SHAPE} ${PILL_H} ${PILL_X} ${PILL_GLASS}`;
 
@@ -298,7 +298,9 @@ export default function TechnologyBackground() {
             backgroundImage: `radial-gradient(900px 420px at 18% 48%, rgba(56,189,248,.35), transparent 70%),
               radial-gradient(900px 420px at 82% 36%, rgba(59,130,246,.30), transparent 70%),
               linear-gradient(120deg, rgba(56,189,248,.15), rgba(59,130,246,.12) 60%)`,
-            animation: ANIMATE_BEAMS ? "twkGradient 12s linear infinite" : "none",
+            animation: ANIMATE_BEAMS
+              ? "twkGradient 12s linear infinite"
+              : "none",
             backgroundPosition: "50% 50%",
           }}
         />
@@ -398,7 +400,7 @@ export default function TechnologyBackground() {
       {/* ==== FOREGROUND (Logo + Buttons) ==== */}
       <div className="absolute inset-0 z-[60]">
         {/* Logo — дээд төв */}
-        <div className="absolute left-1/2 -translate-x-[40%] top-[13vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
+        <div className="absolute left-2/4 -translate-x-[40%] top-[13vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
           <img
             src={FG_LOGO_SRC}
             alt={FG_LOGO_ALT}
@@ -443,7 +445,7 @@ export default function TechnologyBackground() {
               <div className="col-start-1">
                 <TechWeekOverlay
                   label="Tech Week"
-                  triggerClassName={`w-full ${PILL_H} ${PILL_X} rounded-full font-bold text-white text-xl inline-flex items-center justify-center
+                  triggerClassName={`w-full h-[72px] px-10 md:px-16 rounded-full font-bold text-white text-xl inline-flex items-center justify-center
                   bg-gradient-to-r from-orange-400 to-orange-600
                   border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
                   hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
@@ -462,7 +464,7 @@ export default function TechnologyBackground() {
               <button
                 type="button"
                 className={`${PILL_BASE} group col-start-1`}
-                onClick={() => console.log("itpark")}
+                onClick={() => (window.location.href = "https://digitalnomad.itpark.mn/")}
                 aria-label="IT Park"
               >
                 <img
@@ -488,21 +490,20 @@ export default function TechnologyBackground() {
                     className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                     draggable={false}
                   />
-                  
                 </div>
               </button>
 
-              {/* EXTRA 1 */}
+              {/* ✅ KHURDAN: /welcome page руу */}
               <button
                 type="button"
                 className={`${PILL_BASE} group`}
-                onClick={() => console.log("extra-image")}
+                onClick={() => router.push("/welcome")}
                 style={{ gridColumnStart: 1 }}
-                aria-label="Extra Image Button"
+                aria-label="Khurdan Welcome Page"
               >
                 <img
                   src="/logos/khurdan.png"
-                  alt="Extra"
+                  alt="Khurdan"
                   className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                   draggable={false}
                 />
