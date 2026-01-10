@@ -13,80 +13,6 @@ function PlayIcon() {
   );
 }
 
-function VideoTile({
-  src,
-  label,
-  pauseOthers,
-}: {
-  src: string;
-  label?: string;
-  pauseOthers?: () => void;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-
-  const toggle = async () => {
-    const v = ref.current;
-    if (!v) return;
-
-    try {
-      if (v.paused) {
-        pauseOthers?.(); // ✅ бусдыг зогсооно
-        await v.play();
-        setPlaying(true);
-      } else {
-        v.pause();
-        setPlaying(false);
-      }
-    } catch {
-      setPlaying(false);
-    }
-  };
-
-  return (
-    <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
-      {label ? (
-        <div className="mb-2 text-white/85 text-xs font-semibold">{label}</div>
-      ) : null}
-
-      <div className="relative overflow-hidden rounded-xl">
-        <video
-          ref={ref}
-          className="w-full"
-          playsInline
-          preload="metadata"
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onEnded={() => setPlaying(false)}
-        >
-          <source src={src} />
-        </video>
-
-        {/* Бүхэл дээр нь дарж play/pause */}
-        <button
-          type="button"
-          onClick={toggle}
-          className="absolute inset-0"
-          aria-label={playing ? "Pause video" : "Play video"}
-        />
-
-        {/* Play icon overlay */}
-        {!playing && (
-          <div className="pointer-events-none absolute inset-0 grid place-items-center">
-            <div
-              className="grid h-16 w-16 place-items-center rounded-full
-                         bg-black/45 backdrop-blur-[2px]
-                         shadow-[0_18px_50px_rgba(0,0,0,.45)]"
-            >
-              <PlayIcon />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function SignLanguagePage() {
   const router = useRouter();
 
@@ -94,7 +20,7 @@ export default function SignLanguagePage() {
   const VIDEO_1 = "/videos/sign1.mp4";
   const VIDEO_2 = "/videos/sign2.mp4";
   const VIDEO_3 = "/videos/sign3.mp4";
-  const VIDEO_4 = "/videos/sign4.mp4";
+  const VIDEO_4 = "/videos/video5.mp4";
   const IMAGE_1 = "/images/sign.jpg";
 
   // ✅ нэг видео тоглоход бусдыг pause болгох
@@ -109,7 +35,6 @@ export default function SignLanguagePage() {
     });
   };
 
-  // VideoTile дотроос ref-ээ бүртгэх helper
   const attachRef = (idx: number) => (el: HTMLVideoElement | null) => {
     vRefs.current[idx] = el;
   };
@@ -141,67 +66,82 @@ export default function SignLanguagePage() {
             </h1>
           </div>
 
-          {/* grid */}
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
-            {/* NOTE: Доорх VideoTile-уудыг бага зэрэг өөрчилж ref холбоё */}
+          {/* ✅ GRID: дандаа 1 багана (доошоо дарааллаад) */}
+          <div className="mt-8 grid grid-cols-1 gap-5">
+            {/* video 1 */}
             <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
               <div className="relative overflow-hidden rounded-xl">
                 <video
                   ref={attachRef(0)}
-                  className="w-full"
+                  className="w-full aspect-video object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_1} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[0]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[0]}
+                />
               </div>
             </div>
 
+            {/* video 2 */}
             <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
               <div className="relative overflow-hidden rounded-xl">
                 <video
                   ref={attachRef(1)}
-                  className="w-full"
+                  className="w-full aspect-video object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_2} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[1]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[1]}
+                />
               </div>
             </div>
 
+            {/* video 3 */}
             <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
               <div className="relative overflow-hidden rounded-xl">
                 <video
                   ref={attachRef(2)}
-                  className="w-full"
+                  className="w-full aspect-video object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_3} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[2]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[2]}
+                />
               </div>
             </div>
 
+            {/* video 4 */}
             <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
               <div className="relative overflow-hidden rounded-xl">
                 <video
                   ref={attachRef(3)}
-                  className="w-full"
+                  className="w-full aspect-video object-cover"
                   playsInline
                   preload="metadata"
                 >
                   <source src={VIDEO_4} />
                 </video>
-                <VideoOverlay pauseOthers={pauseAll} getVideo={() => vRefs.current[3]} />
+                <VideoOverlay
+                  pauseOthers={pauseAll}
+                  getVideo={() => vRefs.current[3]}
+                />
               </div>
             </div>
 
-            {/* image */}
-            <div className="md:col-span-2 rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
+            {/* image (бас доошоо дарааллаад нэг мөрөнд) */}
+            <div className="rounded-2xl border border-white/12 bg-white/8 p-3 shadow-[0_18px_60px_rgba(0,0,0,.35)]">
               <img
                 src={IMAGE_1}
                 alt="Дохионы хэл зураг"
@@ -281,9 +221,7 @@ function VideoOverlay({
                        bg-black/45 backdrop-blur-[2px]
                        shadow-[0_18px_50px_rgba(0,0,0,.45)]"
           >
-            <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden>
-              <path d="M8 5v14l11-7z" />
-            </svg>
+            <PlayIcon />
           </div>
         </div>
       )}
