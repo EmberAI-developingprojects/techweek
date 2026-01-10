@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import TechWeekOverlay from "@/components/TechWeekOverlay";
 import AvatarVideoFixed from "@/components/AvatarVideoFixed";
 import ICTForumOverlay from "@/components/ICTForumOverlay";
@@ -46,6 +48,7 @@ type HexItem = {
 };
 
 export default function TechnologyBackground() {
+  const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -148,6 +151,21 @@ export default function TechnologyBackground() {
 
     return { particles: parts, nodes: ns, links: ls, hexes: hx };
   }, [mounted]);
+
+  // ✅ ЗӨВХӨН ХЭМЖЭЭ/ХЭЛБЭР НЭГ БОЛГОХ (өнгө/градиент/стайл өөрчлөхгүй)
+  const PILL_H = "h-[72px]";
+  const PILL_X = "px-10 md:px-16";
+
+  const PILL_SHAPE =
+    "relative w-full inline-flex items-center justify-center rounded-full font-bold text-white text-xl";
+
+  // Bottom 4-ийн өмнөх glass styling-ийг ХАДГАЛНА (өнгө өөрчлөхгүй)
+  const PILL_GLASS =
+    "bg-white/10 border border-white/35 " +
+    "shadow-[0_10px_35px_rgba(0,0,0,.28)] backdrop-blur-[2px] " +
+    "hover:bg-white/14 hover:border-white/45 focus:outline-none focus:ring-4 focus:ring-cyan-300/35";
+
+  const PILL_BASE = `${PILL_SHAPE} ${PILL_H} ${PILL_X} ${PILL_GLASS}`;
 
   return (
     <div
@@ -280,9 +298,7 @@ export default function TechnologyBackground() {
             backgroundImage: `radial-gradient(900px 420px at 18% 48%, rgba(56,189,248,.35), transparent 70%),
               radial-gradient(900px 420px at 82% 36%, rgba(59,130,246,.30), transparent 70%),
               linear-gradient(120deg, rgba(56,189,248,.15), rgba(59,130,246,.12) 60%)`,
-            animation: ANIMATE_BEAMS
-              ? "twkGradient 12s linear infinite"
-              : "none",
+            animation: ANIMATE_BEAMS ? "twkGradient 12s linear infinite" : "none",
             backgroundPosition: "50% 50%",
           }}
         />
@@ -352,7 +368,7 @@ export default function TechnologyBackground() {
               cy={n.y * 10}
               r={n.r + 0.3}
               fill="#8be9ff"
-              opacity="0.95"
+              opacity={0.95}
             />
           ))}
         </svg>
@@ -382,13 +398,13 @@ export default function TechnologyBackground() {
       {/* ==== FOREGROUND (Logo + Buttons) ==== */}
       <div className="absolute inset-0 z-[60]">
         {/* Logo — дээд төв */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-[10vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-[40%] top-[13vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
           <img
             src={FG_LOGO_SRC}
             alt={FG_LOGO_ALT}
             className="select-none"
             style={{
-              height: "12vh",
+              height: "8vh",
               width: "auto",
               filter: "drop-shadow(0 6px 24px rgba(0,0,0,.35))",
             }}
@@ -409,13 +425,13 @@ export default function TechnologyBackground() {
             className="pointer-events-auto"
             style={{
               position: "absolute",
-              top: "56vh",
+              top: "52vh",
               left: "50%",
               transform: "translateX(-50%)",
-              width: "min(66vw, 860px)",
+              width: "min(84vw, 980px)",
               display: "flex",
               flexDirection: "column",
-              gap: "18px",
+              gap: "40px",
               mixBlendMode: "normal",
               isolation: "isolate",
               WebkitBackdropFilter: "none",
@@ -423,114 +439,118 @@ export default function TechnologyBackground() {
             }}
           >
             {/* ===== 1-р мөр: TechWeek + ICT Forum ===== */}
-            <div className="flex items-center justify-between gap-4">
-              <TechWeekOverlay
-                label="Tech Week"
-                triggerClassName="relative px-[8vw] md:px-16 py-5 rounded-full font-bold text-white text-xl
-                bg-gradient-to-r from-orange-400 to-orange-600
-                border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
-                hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
-                mix-blend-normal"
-              />
-              <ICTForumOverlay />
+            <div className="grid grid-cols-[1fr_140px_1fr] gap-10">
+              <div className="col-start-1">
+                <TechWeekOverlay
+                  label="Tech Week"
+                  triggerClassName={`w-full ${PILL_H} ${PILL_X} rounded-full font-bold text-white text-xl inline-flex items-center justify-center
+                  bg-gradient-to-r from-orange-400 to-orange-600
+                  border-2 border-orange-300/70 shadow-xl shadow-orange-500/40
+                  hover:shadow-orange-500/70 focus:outline-none focus:ring-4 focus:ring-orange-300/70
+                  mix-blend-normal`}
+                />
+              </div>
+
+              <div className="col-start-3" data-ict-pill>
+                <ICTForumOverlay />
+              </div>
             </div>
 
-            {/* ===== 2-р мөр: IMAGE pill buttons (IT Park + Virtual zone) ===== */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* ===== 2-р мөр: 4 pill button ===== */}
+            <div className="grid grid-cols-[1fr_140px_1fr] gap-10">
               {/* IT Park */}
               <button
                 type="button"
-                className="group relative flex items-center justify-center
-                h-[64px] w-full rounded-full
-                border border-white/35 bg-white/10
-                shadow-[0_10px_35px_rgba(0,0,0,.28)]
-                backdrop-blur-[2px]
-                hover:bg-white/14 hover:border-white/45
-                focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                className={`${PILL_BASE} group col-start-1`}
                 onClick={() => console.log("itpark")}
                 aria-label="IT Park"
               >
                 <img
                   src="/logos/itpark.png"
                   alt="IT Park"
-                  className="h-[34px] w-auto select-none pointer-events-none
-                  drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
-                  group-hover:scale-[1.01] transition-transform"
+                  className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                   draggable={false}
                 />
               </button>
 
-              {/* Virtual zone */}
+              {/* Virtual zone -> /virtual-bus */}
               <button
                 type="button"
-                className="group relative flex items-center justify-center
-                h-[64px] w-full rounded-full
-                border border-white/35 bg-white/10
-                shadow-[0_10px_35px_rgba(0,0,0,.28)]
-                backdrop-blur-[2px]
-                hover:bg-white/14 hover:border-white/45
-                focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
-                onClick={() => console.log("virtualzone")}
+                className={`${PILL_BASE} group`}
+                onClick={() => router.push("/virtual-bus")}
                 aria-label="Виртуал бүс"
+                style={{ gridColumnStart: 3 }}
               >
                 <div className="flex items-center gap-3">
                   <img
                     src="/logos/virtualzone.png"
                     alt="Виртуал бүс"
-                    className="h-[34px] w-auto select-none pointer-events-none
-                    drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
-                    group-hover:scale-[1.01] transition-transform"
+                    className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                     draggable={false}
                   />
                   <span className="h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,.85)]" />
                 </div>
               </button>
-              {/* EXTRA 1: Image pill button */}
+
+              {/* EXTRA 1 */}
               <button
                 type="button"
-                className="group relative flex items-center justify-center
-      h-[64px] w-full rounded-full
-      border border-white/35 bg-white/10
-      shadow-[0_10px_35px_rgba(0,0,0,.28)]
-      backdrop-blur-[2px]
-      hover:bg-white/14 hover:border-white/45
-      focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
+                className={`${PILL_BASE} group`}
                 onClick={() => console.log("extra-image")}
+                style={{ gridColumnStart: 1 }}
                 aria-label="Extra Image Button"
               >
                 <img
-                  src="/logos/khurdan.png" // ✅ ЭНД өөрийн зургаа солиорой
+                  src="/logos/khurdan.png"
                   alt="Extra"
-                  className="h-[34px] w-auto select-none pointer-events-none
-        drop-shadow-[0_8px_18px_rgba(0,0,0,.35)]
-        group-hover:scale-[1.01] transition-transform"
+                  className="h-[38px] w-auto select-none pointer-events-none drop-shadow-[0_8px_18px_rgba(0,0,0,.35)] group-hover:scale-[1.01] transition-transform"
                   draggable={false}
                 />
               </button>
 
-              {/* EXTRA 2: Text pill button */}
+              {/* Sign language -> /sign-language */}
               <button
                 type="button"
-                className="group relative flex items-center justify-center
-      h-[64px] w-full rounded-full
-      border border-white/35 bg-white/10
-      shadow-[0_10px_35px_rgba(0,0,0,.28)]
-      backdrop-blur-[2px]
-      hover:bg-white/14 hover:border-white/45
-      focus:outline-none focus:ring-4 focus:ring-cyan-300/35"
-                onClick={() => console.log("extra-text")}
-                aria-label="Extra Text Button"
+                className={`${PILL_BASE} group`}
+                onClick={() => router.push("/sign-language")}
+                style={{ gridColumnStart: 3 }}
+                aria-label="Дохионы хэл"
               >
-                <span
-                  className="text-[18px] font-semibold tracking-wide text-white/95
-        drop-shadow-[0_6px_14px_rgba(0,0,0,.35)]"
-                >
+                <span className="text-xl font-bold tracking-wide text-white/95 drop-shadow-[0_6px_14px_rgba(0,0,0,.35)]">
                   Дохионы хэл
                 </span>
               </button>
             </div>
           </div>
         </ClientPortal>
+
+        {/* ✅ ICTForumOverlay-ийн дотор trigger хэмжээ өөр байвал эндээс хүчээр ижил болгоно (өнгө/градиент өөрчлөхгүй) */}
+        <style jsx global>{`
+          [data-ict-pill] > * {
+            width: 100%;
+          }
+          [data-ict-pill] button,
+          [data-ict-pill] [role="button"],
+          [data-ict-pill] a {
+            width: 100% !important;
+            height: 72px !important;
+            padding-left: 2.5rem !important; /* px-10 */
+            padding-right: 2.5rem !important;
+            border-radius: 9999px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box;
+          }
+          @media (min-width: 768px) {
+            [data-ict-pill] button,
+            [data-ict-pill] [role="button"],
+            [data-ict-pill] a {
+              padding-left: 4rem !important; /* md:px-16 */
+              padding-right: 4rem !important;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
