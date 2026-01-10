@@ -9,7 +9,7 @@ export default function WelcomePage() {
   const vRef = useRef<HTMLVideoElement | null>(null);
 
   // ✅ public/videos/та тавтай морилно уу.mp4 (кирилл + зайтай -> encode)
-  const SRC = "/videos/welcome.mp4";
+  const SRC = "/videos/v.mp4";
 
   useEffect(() => {
     const v = vRef.current;
