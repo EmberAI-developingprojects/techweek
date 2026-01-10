@@ -400,7 +400,7 @@ export default function TechnologyBackground() {
       {/* ==== FOREGROUND (Logo + Buttons) ==== */}
       <div className="absolute inset-0 z-[60]">
         {/* Logo — дээд төв */}
-        <div className="absolute left-2/4 -translate-x-[40%] top-[13vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
+        <div className="absolute left-1/2 -translate-x-[40%] top-[13vh] sm:top-[9vh] md:top-[8vh] pointer-events-none">
           <img
             src={FG_LOGO_SRC}
             alt={FG_LOGO_ALT}
