@@ -81,14 +81,14 @@ export default function VirtualBusPage() {
               <img
                 src="/logos/virtualzone.png"
                 alt="Виртуал бүс"
-                className="h-[56px] sm:h-[68px] w-auto select-none pointer-events-none
+                className="h-[156px] sm:h-[148px] w-auto select-none pointer-events-none
                            drop-shadow-[0_10px_28px_rgba(0,0,0,.40)]"
                 draggable={false}
               />
             </div>
 
             {/* Buttons */}
-            <div className="mt-6 flex flex-col gap-5">
+            <div className="mt-20 flex flex-col gap-5">
               <button
                 type="button"
                 className="pointer-events-auto h-14 w-full rounded-full
