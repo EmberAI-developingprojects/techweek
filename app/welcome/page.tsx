@@ -43,6 +43,7 @@ export default function WelcomePage() {
         playsInline
         preload="auto"
         loop
+        muted
         // autoplay заавал ажиллуулахыг хүсвэл доорх 2-г асаа
         // muted
         // autoPlay
