@@ -5,11 +5,20 @@ import React, { useRef } from "react";
 import { useRouter } from "next/navigation";
 import TechBlueBackground from "@/components/TechBlueBackground";
 
-// ✅ Хэмжээ тааруулах хувь (өргөн)
+// ✅ Дизайны fixed өргөн
+const CONTENT_W = 980;
+
+// бусад видеонууд
 const W1 = "72%";
 const W2 = "72%";
 const W3 = "72%";
-const W4 = "60%"; // ✅ screenshot дээрх шиг (сүүлийн видео)
+
+// ✅ НОГООН ВИДЕО — ЯГ ХҮССЭН STYLE
+const GREEN_STYLE = {
+  width: "51%",
+  left: "50%",
+  transform: "translateX(-50%)",
+} as const;
 
 export default function SignLanguagePage() {
   const router = useRouter();
@@ -17,7 +26,7 @@ export default function SignLanguagePage() {
   const VIDEO_1 = "/videos/sign1.mp4";
   const VIDEO_2 = "/videos/sign2.mp4";
   const VIDEO_3 = "/videos/sign3.mp4";
-  const VIDEO_4 = "/videos/video5.mp4"; // 🟢 сүүлийн
+  const VIDEO_4 = "/videos/video5.mp4"; // 🟢 ногоон
   const IMAGE_1 = "/images/sign.jpg";
 
   const vRefs = useRef<Array<HTMLVideoElement | null>>([]);
@@ -50,56 +59,71 @@ export default function SignLanguagePage() {
 
       {/* CONTENT */}
       <div className="pointer-events-none absolute inset-0 z-[50]">
-        <div className="pointer-events-auto absolute inset-0 px-4">
+        <div className="pointer-events-auto absolute inset-0 overflow-y-auto px-4">
           <div
-            className="mx-auto w-full"
+            className="mx-auto"
             style={{
-              maxWidth: "980px",
+              width: CONTENT_W,
               paddingTop: "calc(env(safe-area-inset-top, 0px) + 18px)",
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
             }}
           >
-            <div
-              className="mt-4 flex flex-col gap-3"
-              style={{
-                height:
-                  "calc(100svh - (env(safe-area-inset-top, 0px) + 44px) - (env(safe-area-inset-bottom, 0px) + 28px) - 28px)",
-              }}
-            >
+            <div className="mt-36 flex flex-col gap-3">
               {/* VIDEO 1 */}
-              <Tile>
-                <Video refCb={attachRef(0)} src={VIDEO_1} widthPct={W1} fit="contain" />
-              </Tile>
+              <TileFixed>
+                <Video
+                  refCb={attachRef(0)}
+                  src={VIDEO_1}
+                  widthPct={W1}
+                  fit="contain"
+                />
+              </TileFixed>
 
               {/* VIDEO 2 */}
-              <Tile>
-                <Video refCb={attachRef(1)} src={VIDEO_2} widthPct={W2} fit="contain" />
-              </Tile>
+              <TileFixed>
+                <Video
+                  refCb={attachRef(1)}
+                  src={VIDEO_2}
+                  widthPct={W2}
+                  fit="contain"
+                />
+              </TileFixed>
 
               {/* VIDEO 3 */}
-              <Tile>
-                <Video refCb={attachRef(2)} src={VIDEO_3} widthPct={W3} fit="contain" />
-              </Tile>
-
-              {/* ✅ VIDEO 4 — screenshot design: object-cover + width 60% */}
-              <Tile>
+              <TileFixed>
                 <Video
-                  refCb={attachRef(3)}
-                  src={VIDEO_4}
-                  widthPct={W4}
-                  fit="cover"
+                  refCb={attachRef(2)}
+                  src={VIDEO_3}
+                  widthPct={W3}
+                  fit="contain"
                 />
-              </Tile>
+              </TileFixed>
+
+              {/* ✅ НОГООН VIDEO — FIXED 51% */}
+              <TileFixed>
+                <video
+                  ref={attachRef(3)}
+                  className="absolute top-0 h-full object-cover object-center"
+                  style={GREEN_STYLE}
+                  playsInline
+                  preload="auto"
+                  muted
+                  loop
+                  autoPlay
+                >
+                  <source src={VIDEO_4} />
+                </video>
+              </TileFixed>
 
               {/* IMAGE */}
-              <Tile>
+              <TileFixed>
                 <img
                   src={IMAGE_1}
                   alt="Дохионы хэл зураг"
                   className="absolute inset-0 h-full w-full object-contain object-center"
                   draggable={false}
                 />
-              </Tile>
+              </TileFixed>
             </div>
           </div>
         </div>
@@ -108,15 +132,16 @@ export default function SignLanguagePage() {
   );
 }
 
-/* ✅ aspect-гүй: өндөр нь flex-1-ээр тэнцүү */
-function Tile({ children }: { children: React.ReactNode }) {
+/* ✅ Fixed height tile — дэлгэцээс хамаарахгүй */
+function TileFixed({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-0 flex-1 overflow-hidden rounded-[22px] sm:rounded-[26px]">
+    <div className="relative h-[280px] w-full overflow-hidden rounded-[22px] sm:rounded-[26px]">
       {children}
     </div>
   );
 }
 
+/* бусад видеонууд */
 function Video({
   src,
   refCb,
@@ -125,7 +150,7 @@ function Video({
 }: {
   src: string;
   refCb?: (el: HTMLVideoElement | null) => void;
-  widthPct?: string; // "60%" гэх мэт
+  widthPct?: string;
   fit?: "contain" | "cover";
 }) {
   const fitClass = fit === "cover" ? "object-cover" : "object-contain";
@@ -136,11 +161,7 @@ function Video({
       className={`absolute top-0 h-full ${fitClass} object-center`}
       style={
         widthPct
-          ? {
-              width: widthPct,
-              left: "50%",
-              transform: "translateX(-50%)",
-            }
+          ? { width: widthPct, left: "50%", transform: "translateX(-50%)" }
           : { width: "100%", left: 0 }
       }
       playsInline
