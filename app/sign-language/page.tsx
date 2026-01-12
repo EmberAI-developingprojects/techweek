@@ -1,17 +1,15 @@
 // app/sign-language/page.tsx
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useRouter } from "next/navigation";
 import TechBlueBackground from "@/components/TechBlueBackground";
 
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white" aria-hidden>
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
+// ✅ Хэмжээ тааруулах хувь (өргөн)
+const W1 = "72%";
+const W2 = "72%";
+const W3 = "72%";
+const W4 = "60%"; // ✅ screenshot дээрх шиг (сүүлийн видео)
 
 export default function SignLanguagePage() {
   const router = useRouter();
@@ -19,30 +17,17 @@ export default function SignLanguagePage() {
   const VIDEO_1 = "/videos/sign1.mp4";
   const VIDEO_2 = "/videos/sign2.mp4";
   const VIDEO_3 = "/videos/sign3.mp4";
-  const VIDEO_4 = "/videos/video5.mp4";
+  const VIDEO_4 = "/videos/video5.mp4"; // 🟢 сүүлийн
   const IMAGE_1 = "/images/sign.jpg";
 
   const vRefs = useRef<Array<HTMLVideoElement | null>>([]);
-
-  const pauseAll = () => {
-    vRefs.current.forEach((v) => {
-      if (!v) return;
-      try {
-        v.pause();
-      } catch {}
-    });
-  };
-
   const attachRef = (idx: number) => (el: HTMLVideoElement | null) => {
     vRefs.current[idx] = el;
   };
 
   const goBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/"); // үндсэн route өөр бол энд солиорой
-    }
+    if (typeof window !== "undefined" && window.history.length > 1) router.back();
+    else router.push("/");
   };
 
   return (
@@ -54,11 +39,11 @@ export default function SignLanguagePage() {
         type="button"
         onClick={goBack}
         className="fixed left-6 z-[200] grid h-14 w-14 place-items-center
-                   rounded-lg bg-emerald-700/95 text-white text-3xl font-bold leading-none
+                   rounded-lg bg-emerald-700/95 text-white text-3xl font-bold
                    shadow-[0_12px_30px_rgba(0,0,0,.4)]
                    hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-300/40"
-        aria-label="Back"
         style={{ top: "calc(env(safe-area-inset-top, 0px) + 44px)" }}
+        aria-label="Back"
       >
         ‹
       </button>
@@ -74,7 +59,6 @@ export default function SignLanguagePage() {
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
             }}
           >
-            {/* scroll байхгүй — 5 tile-ийг flex-ээр тэнцүү хуваана */}
             <div
               className="mt-4 flex flex-col gap-3"
               style={{
@@ -83,78 +67,39 @@ export default function SignLanguagePage() {
               }}
             >
               {/* VIDEO 1 */}
-              <Tile43>
-                <video
-                  ref={attachRef(0)}
-                  className="absolute inset-0 h-full w-full object-contain"
-                  playsInline
-                  preload="metadata"
-                >
-                  <source src={VIDEO_1} />
-                </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[0]}
-                />
-              </Tile43>
+              <Tile>
+                <Video refCb={attachRef(0)} src={VIDEO_1} widthPct={W1} fit="contain" />
+              </Tile>
 
               {/* VIDEO 2 */}
-              <Tile43>
-                <video
-                  ref={attachRef(1)}
-                  className="absolute inset-0 h-full w-full object-contain"
-                  playsInline
-                  preload="metadata"
-                >
-                  <source src={VIDEO_2} />
-                </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[1]}
-                />
-              </Tile43>
+              <Tile>
+                <Video refCb={attachRef(1)} src={VIDEO_2} widthPct={W2} fit="contain" />
+              </Tile>
 
               {/* VIDEO 3 */}
-              <Tile43>
-                <video
-                  ref={attachRef(2)}
-                  className="absolute inset-0 h-full w-full object-contain"
-                  playsInline
-                  preload="metadata"
-                >
-                  <source src={VIDEO_3} />
-                </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[2]}
-                />
-              </Tile43>
+              <Tile>
+                <Video refCb={attachRef(2)} src={VIDEO_3} widthPct={W3} fit="contain" />
+              </Tile>
 
-              {/* VIDEO 4 (✅ жаахан томруулсан) */}
-              <Tile43>
-                <video
-                  ref={attachRef(3)}
-                  className="absolute inset-0 h-full w-full object-contain scale-[1.12] origin-center"
-                  playsInline
-                  preload="metadata"
-                >
-                  <source src={VIDEO_4} />
-                </video>
-                <VideoOverlay
-                  pauseOthers={pauseAll}
-                  getVideo={() => vRefs.current[3]}
+              {/* ✅ VIDEO 4 — screenshot design: object-cover + width 60% */}
+              <Tile>
+                <Video
+                  refCb={attachRef(3)}
+                  src={VIDEO_4}
+                  widthPct={W4}
+                  fit="cover"
                 />
-              </Tile43>
+              </Tile>
 
               {/* IMAGE */}
-              <Tile43>
+              <Tile>
                 <img
                   src={IMAGE_1}
                   alt="Дохионы хэл зураг"
-                  className="absolute inset-0 h-full w-full object-contain"
+                  className="absolute inset-0 h-full w-full object-contain object-center"
                   draggable={false}
                 />
-              </Tile43>
+              </Tile>
             </div>
           </div>
         </div>
@@ -163,80 +108,48 @@ export default function SignLanguagePage() {
   );
 }
 
-/* ✅ BOX-уудыг арилгасан: border/bg/shadow байхгүй, зөвхөн 4:3 + overflow
-   ✅ Буланг бага зэрэг илүү дугуй болгосон */
-function Tile43({ children }: { children: React.ReactNode }) {
+/* ✅ aspect-гүй: өндөр нь flex-1-ээр тэнцүү */
+function Tile({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="relative min-h-0 flex-1 aspect-[4/3] overflow-hidden rounded-[22px] sm:rounded-[26px]"
-    >
+    <div className="relative min-h-0 flex-1 overflow-hidden rounded-[22px] sm:rounded-[26px]">
       {children}
     </div>
   );
 }
 
-function VideoOverlay({
-  getVideo,
-  pauseOthers,
+function Video({
+  src,
+  refCb,
+  widthPct,
+  fit = "contain",
 }: {
-  getVideo: () => HTMLVideoElement | null | undefined;
-  pauseOthers: () => void;
+  src: string;
+  refCb?: (el: HTMLVideoElement | null) => void;
+  widthPct?: string; // "60%" гэх мэт
+  fit?: "contain" | "cover";
 }) {
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    const v = getVideo();
-    if (!v) return;
-
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-    const onEnded = () => setPlaying(false);
-
-    v.addEventListener("play", onPlay);
-    v.addEventListener("pause", onPause);
-    v.addEventListener("ended", onEnded);
-
-    return () => {
-      v.removeEventListener("play", onPlay);
-      v.removeEventListener("pause", onPause);
-      v.removeEventListener("ended", onEnded);
-    };
-  }, []);
-
-  const toggle = async () => {
-    const v = getVideo();
-    if (!v) return;
-
-    try {
-      if (v.paused) {
-        pauseOthers();
-        await v.play();
-      } else {
-        v.pause();
-      }
-    } catch {}
-  };
+  const fitClass = fit === "cover" ? "object-cover" : "object-contain";
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={toggle}
-        className="absolute inset-0"
-        aria-label={playing ? "Pause video" : "Play video"}
-      />
-
-      {!playing && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center">
-          <div
-            className="grid h-12 w-12 place-items-center rounded-full
-                       bg-black/45 backdrop-blur-[2px]
-                       shadow-[0_18px_50px_rgba(0,0,0,.45)]"
-          >
-            <PlayIcon />
-          </div>
-        </div>
-      )}
-    </>
+    <video
+      ref={refCb}
+      className={`absolute top-0 h-full ${fitClass} object-center`}
+      style={
+        widthPct
+          ? {
+              width: widthPct,
+              left: "50%",
+              transform: "translateX(-50%)",
+            }
+          : { width: "100%", left: 0 }
+      }
+      playsInline
+      preload="auto"
+      muted
+      loop
+      autoPlay
+    >
+      <source src={src} />
+    </video>
   );
 }
